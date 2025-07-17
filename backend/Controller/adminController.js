@@ -40,6 +40,9 @@ export const loginAdmin = async (req, res) => {
     }
     const token = jwt.sign({ id: admin._id, email: admin.email, role: "admin" }, JWT_SECRET, { expiresIn: "1d" });
     res.cookie("token", token, {
+
+
+    
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
