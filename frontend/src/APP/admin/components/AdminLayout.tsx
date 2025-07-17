@@ -11,7 +11,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex transition-colors duration-300">
+    <div className="relative min-h-screen bg-[var(--primary-bg)] flex transition-colors duration-300">
       {/* Navbar at the top */}
       <AdminNavbar onSidebarToggle={() => setSidebarOpen((open) => !open)} />
       {/* Sidebar with slide animation, below navbar */}

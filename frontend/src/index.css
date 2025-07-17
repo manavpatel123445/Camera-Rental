@@ -1,1 +1,11 @@
+/* Aurora light palette variables */
+:root {
+  --primary-bg: #F4F6F8;      /* Main background: very light gray */
+  --secondary-bg: #fff;       /* Card/sidebar/navbar: white */
+  --border-color: #E3E8EF;    /* Soft border */
+  --sidebar-hover: #f1f3f7;   /* Light gray for sidebar hover */
+  --text-primary: #000;       /* Main text: black */
+  --text-secondary: #555;     /* Secondary text */
+}
+
 @import "tailwindcss";

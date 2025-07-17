@@ -26,9 +26,12 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('theme', theme);
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      console.log('Dark mode enabled: dark class added to <html>');
     } else {
       document.documentElement.classList.remove('dark');
+      console.log('Light mode enabled: dark class removed from <html>');
     }
+    console.log('Current theme:', theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));

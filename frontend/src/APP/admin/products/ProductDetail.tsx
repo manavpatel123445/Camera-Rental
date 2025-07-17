@@ -179,8 +179,8 @@ const ProductDetail = () => {
   return (
     <AdminLayout>
       <div className="flex items-center justify-center py-4 px-2 min-h-screen">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-5 border border-slate-200">
-          <h2 className="text-2xl font-extrabold text-slate-800 mb-1 text-center tracking-tight">Product Details</h2>
+        <div className="w-full max-w-md bg-[var(--secondary-bg)] rounded-2xl shadow-2xl p-5 border border-[var(--border-color)]">
+          <h2 className="text-2xl font-extrabold text-[var(--text-primary)] mb-1 text-center tracking-tight">Product Details</h2>
           <form onSubmit={handleUpdate} className="space-y-3">
             <div>
               <label className="block font-semibold mb-1 text-slate-700">Name<span className="text-red-500">*</span></label>

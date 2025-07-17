@@ -70,11 +70,11 @@ const ProductList = () => {
   return (
     <AdminLayout>
       <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6">Product Management</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[var(--text-primary)]">Product Management</h1>
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-lg shadow">
+          <table className="min-w-full bg-[var(--secondary-bg)] rounded-lg shadow border border-[var(--border-color)] text-[var(--text-primary)]">
             <thead>
-              <tr className="bg-gray-200">
+              <tr className="bg-[var(--primary-bg)]">
                 <th className="py-2 px-4 text-left">Image</th>
                 <th className="py-2 px-4 text-left">Name</th>
                 <th className="py-2 px-4 text-left">Category</th>

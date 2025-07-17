@@ -18,11 +18,11 @@ const Dashboard = () => {
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
-        <div className="bg-white/80 rounded-lg shadow p-4 md:p-6">Stats Widget (e.g. Users, Orders)</div>
-        <div className="bg-white/80 rounded-lg shadow p-4 md:p-6">Charts (e.g. Rentals, Revenue)</div>
-        <div className="bg-white/80 rounded-lg shadow p-4 md:p-6">Recent Activity</div>
+        <div className="bg-[var(--secondary-bg)] border border-[var(--border-color)] rounded-xl shadow-sm p-4 md:p-6 text-[var(--text-primary)]">Stats Widget (e.g. Users, Orders)</div>
+        <div className="bg-[var(--secondary-bg)] border border-[var(--border-color)] rounded-xl shadow-sm p-4 md:p-6 text-[var(--text-primary)]">Charts (e.g. Rentals, Revenue)</div>
+        <div className="bg-[var(--secondary-bg)] border border-[var(--border-color)] rounded-xl shadow-sm p-4 md:p-6 text-[var(--text-primary)]">Recent Activity</div>
       </div>
-      <div className="bg-white/80 rounded-lg shadow p-4 md:p-6">More dashboard content here...</div>
+      <div className="bg-[var(--secondary-bg)] border border-[var(--border-color)] rounded-xl shadow-sm p-4 md:p-6 text-[var(--text-primary)]">More dashboard content here...</div>
     </AdminLayout>
   );
 };
