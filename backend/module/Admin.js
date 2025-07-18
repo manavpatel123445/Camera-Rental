@@ -17,6 +17,34 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  firstName: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  lastName: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  phone: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  bio: {
+    type: String,
+    trim: true,
+    default: "",
+  },
+  dateOfBirth: {
+    type: Date,
+    default: null,
+  },
+  profileImage: {
+    type: String,
+    default: "",
+  },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
   createdAt: {

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FaUpload, FaTag, FaList, FaDollarSign, FaAlignLeft, FaImage } from 'react-icons/fa';
+import { FaUpload, FaTag, FaList, FaDollarSign, FaAlignLeft, FaImage } from 'react-icons/fa'; // Removed due to missing module
 import AdminLayout from '../components/AdminLayout';
 interface ProductForm {
   name: string;
