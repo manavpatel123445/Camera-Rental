@@ -1,8 +1,12 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FaUpload, FaTag, FaList, FaDollarSign, FaAlignLeft, FaImage } from 'react-icons/fa'; // Removed due to missing module
+import { FaUpload, FaTag, FaList, FaDollarSign, FaAlignLeft, FaImage } from 'react-icons/fa';
 import AdminLayout from '../components/AdminLayout';
+import { Button } from '../../../components/ui/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
+import { Input } from '../../../components/ui/Input';
+import ProductShowcase from '../../../components/3D/ProductShowcase';
 interface ProductForm {
   name: string;
   category: string;
@@ -11,6 +15,7 @@ interface ProductForm {
   image: File | null;
   imageUrl: string;
   quantity: string;
+  splineUrl: string;
 }
 
 const AddProduct = () => {
@@ -22,6 +27,7 @@ const AddProduct = () => {
     image: null,
     imageUrl: '',
     quantity: '1',
+    splineUrl: '',
   });
   const [imageType, setImageType] = useState<'file' | 'url'>('file');
   const [loading, setLoading] = useState(false);
@@ -84,6 +90,7 @@ const AddProduct = () => {
       formData.append('quantity', form.quantity);
       if (imageType === 'file' && form.image) formData.append('image', form.image);
       if (imageType === 'url' && form.imageUrl) formData.append('imageUrl', form.imageUrl);
+      if (form.splineUrl) formData.append('splineUrl', form.splineUrl);
 
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:3000/api/products', {
@@ -120,172 +127,215 @@ const AddProduct = () => {
   return (
     <AdminLayout>
       <div className="flex items-center justify-center py-4 px-2 min-h-screen">
-        <div className="w-full max-w-md bg-[var(--secondary-bg)] rounded-2xl shadow-2xl p-5 border border-[var(--border-color)]">
-          <h2 className="text-2xl font-extrabold text-[var(--text-primary)] mb-1 text-center tracking-tight">Add New Product</h2>
-          <p className="text-[var(--text-secondary)] mb-4 text-center text-sm">Fill in the details below to add a new product to your catalog.</p>
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <label className="block font-semibold mb-1 text-slate-700">Name<span className="text-red-500">*</span></label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><FaTag /></span>
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
-                  required
-                  placeholder="Product name"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block font-semibold mb-1 text-slate-700">Category<span className="text-red-500">*</span></label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><FaList /></span>
-                <select
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
-                  className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none"
-                  required
-                >
-                  <option value="" disabled>Select category</option>
-                  {categoryOptions.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="block font-semibold mb-1 text-slate-700">Price Per Day ($)<span className="text-red-500">*</span></label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><FaDollarSign /></span>
-                <input
-                  type="number"
-                  name="pricePerDay"
-                  value={form.pricePerDay}
-                  onChange={handleChange}
-                  className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
-                  required
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block font-semibold mb-1 text-slate-700">Description</label>
-              <div className="relative">
-                <span className="absolute left-3 top-4 text-slate-400"><FaAlignLeft /></span>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
-                  rows={2}
-                  placeholder="Product description (optional)"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block font-semibold mb-1 text-slate-700">Quantity<span className="text-red-500">*</span></label>
-              <input
-                type="number"
-                name="quantity"
-                value={form.quantity}
-                onChange={handleChange}
-                className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
-                required
-                min="1"
-                step="1"
-                placeholder="Quantity"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold mb-1 text-slate-700">Image</label>
-              <div className="flex items-center gap-4 mb-1">
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="imageType"
-                    value="file"
-                    checked={imageType === 'file'}
-                    onChange={handleImageTypeChange}
-                  />
-                  Upload File
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="imageType"
-                    value="url"
-                    checked={imageType === 'url'}
-                    onChange={handleImageTypeChange}
-                  />
-                  Image URL
-                </label>
-              </div>
-              {imageType === 'file' ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 bg-slate-500 text-white px-4 py-1 rounded-lg hover:bg-slate-600 focus:outline-none shadow text-sm"
-                  >
-                    <FaUpload />
-                    {form.image ? 'Change File' : 'Upload File'}
-                  </button>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    ref={fileInputRef}
-                  />
-                  {form.image && (
-                    <span className="text-xs text-gray-700 truncate max-w-xs">{form.image.name}</span>
-                  )}
-                  {form.image && (
-                    <img
-                      src={URL.createObjectURL(form.image)}
-                      alt="Preview"
-                      className="w-12 h-12 object-cover rounded-lg border border-slate-200 ml-2 shadow"
-                    />
-                  )}
-                </div>
-              ) : (
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><FaImage /></span>
-                  <input
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <CardTitle className="text-center">Add New Product</CardTitle>
+            <CardDescription className="text-center">
+              Fill in the details below to add a new product to your catalog.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold mb-2 text-sm">Name<span className="text-red-500">*</span></label>
+                  <Input
                     type="text"
-                    name="imageUrl"
-                    value={form.imageUrl}
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="Product name"
+                    leftIcon={<FaTag className="w-4 h-4" />}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-2 text-sm">Category<span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"><FaList /></span>
+                    <select
+                      name="category"
+                      value={form.category}
+                      onChange={handleChange}
+                      className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none bg-white"
+                      required
+                    >
+                      <option value="" disabled>Select category</option>
+                      {categoryOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-semibold mb-2 text-sm">Price Per Day ($)<span className="text-red-500">*</span></label>
+                  <Input
+                    type="number"
+                    name="pricePerDay"
+                    value={form.pricePerDay}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    leftIcon={<FaDollarSign className="w-4 h-4" />}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block font-semibold mb-2 text-sm">Description</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-4 text-slate-400"><FaAlignLeft /></span>
+                  <textarea
+                    name="description"
+                    value={form.description}
                     onChange={handleChange}
                     className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
-                    placeholder="https://example.com/image.jpg"
+                    rows={3}
+                    placeholder="Product description (optional)"
                   />
-                  {form.imageUrl && (
-                    <img
-                      src={form.imageUrl}
-                      alt="Preview"
-                      className="w-12 h-12 object-cover rounded-lg border border-slate-200 ml-2 mt-1 shadow"
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold mb-2 text-sm">Quantity<span className="text-red-500">*</span></label>
+                  <Input
+                    type="number"
+                    name="quantity"
+                    value={form.quantity}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                    step="1"
+                    placeholder="Quantity"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-2 text-sm">3D Model URL (Spline)</label>
+                  <Input
+                    type="text"
+                    name="splineUrl"
+                    value={form.splineUrl}
+                    onChange={handleChange}
+                    placeholder="https://spline.design/your-3d-model"
+                    leftIcon={<FaImage className="w-4 h-4" />}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block font-semibold mb-2 text-sm">Image</label>
+                <div className="flex items-center gap-4 mb-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="imageType"
+                      value="file"
+                      checked={imageType === 'file'}
+                      onChange={handleImageTypeChange}
+                      className="w-4 h-4"
                     />
-                  )}
+                    <span className="text-sm">Upload File</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="imageType"
+                      value="url"
+                      checked={imageType === 'url'}
+                      onChange={handleImageTypeChange}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Image URL</span>
+                  </label>
+                </div>
+                {imageType === 'file' ? (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2"
+                    >
+                      <FaUpload className="w-4 h-4" />
+                      {form.image ? 'Change File' : 'Upload File'}
+                    </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      ref={fileInputRef}
+                    />
+                    {form.image && (
+                      <span className="text-xs text-gray-700 truncate max-w-xs">{form.image.name}</span>
+                    )}
+                    {form.image && (
+                      <img
+                        src={URL.createObjectURL(form.image)}
+                        alt="Preview"
+                        className="w-12 h-12 object-cover rounded-lg border border-slate-200 shadow"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      name="imageUrl"
+                      value={form.imageUrl}
+                      onChange={handleChange}
+                      placeholder="https://example.com/image.jpg"
+                      leftIcon={<FaImage className="w-4 h-4" />}
+                    />
+                    {form.imageUrl && (
+                      <img
+                        src={form.imageUrl}
+                        alt="Preview"
+                        className="w-12 h-12 object-cover rounded-lg border border-slate-200 mt-2 shadow"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* 3D Model Preview */}
+              {(form.splineUrl || form.imageUrl) && (
+                <div>
+                  <label className="block font-semibold mb-2 text-sm">Preview</label>
+                  <ProductShowcase
+                    splineUrl={form.splineUrl}
+                    fallbackImage={form.imageUrl}
+                    productName={form.name}
+                    className="w-full"
+                  />
                 </div>
               )}
-            </div>
-            {error && <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-1 rounded-lg font-semibold text-center animate-pulse text-sm">{error}</div>}
-            {success && <div className="bg-green-100 border border-green-300 text-green-700 px-3 py-1 rounded-lg font-semibold text-center animate-fade-in text-sm">{success}</div>}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-slate-700 to-slate-500 text-white px-4 py-2 rounded-lg hover:from-slate-800 hover:to-slate-600 shadow-lg font-bold text-base transition disabled:opacity-50"
-              disabled={loading}
-            >
-              {loading ? 'Adding...' : 'Add Product'}
-            </button>
-          </form>
-        </div>
+                          {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                  {success}
+                </div>
+              )}
+              
+              <Button
+                type="submit"
+                variant="gradient"
+                size="lg"
+                loading={loading}
+                className="w-full"
+              >
+                {loading ? 'Adding Product...' : 'Add Product'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );

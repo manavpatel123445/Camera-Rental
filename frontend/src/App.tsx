@@ -16,14 +16,11 @@ import ProductList from './APP/admin/products/ProductList';
 import AddProduct from './APP/admin/products/AddProduct';
 import ProductDetail from './APP/admin/products/ProductDetail';
 import { ThemeProvider } from './APP/admin/components/ThemeContext';
+import Home from './Home';
+import Login from './APP/Pages/Login';
+import Register from './APP/Pages/Register';
+import UserProfile from './APP/Pages/UserProfile';
 
-function HomePage() {
-  return (
-    <div>
-      <h1 className='text-3xl font-bold underline'>Hello World</h1>
-    </div>
-  );
-}
 
 function App() {
   const dispatch = useDispatch<any>();
@@ -56,10 +53,27 @@ function App() {
         </ProtectedRoute>
       } />
     
-      <Route path="/admin/products" element={<ProductList />} />
-      <Route path="/admin/addproduct" element={<AddProduct />} />
-      <Route path="/admin/products/:id" element={<ProductDetail />} />
-      <Route path="/" element={<HomePage />} />
+      <Route path="/admin/products" element={
+        <ProtectedRoute>
+          <ProductList />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/addproduct" element={
+        <ProtectedRoute>
+          <AddProduct />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/products/:id" element={
+        <ProtectedRoute>
+          <ProductDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/profile" element={<UserProfile />} />
+
+       
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
     </Routes>
     </ThemeProvider>
   );

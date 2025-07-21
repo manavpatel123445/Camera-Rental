@@ -40,7 +40,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
       const formData = new FormData();
       formData.append('name', form.name);
       formData.append('category', form.category);
-      formData.append('pricePerDay', form.price); // <-- fix: backend expects pricePerDay
+      formData.append('pricePerDay', form.price); 
       formData.append('status', form.status);
       formData.append('description', form.description);
       formData.append('quantity', form.quantity);
@@ -61,7 +61,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
 
       const data = await res.json();
       if (res.ok) {
-        onSave(data); // Optionally update parent
+        onSave(data); 
         setForm(initialForm);
         onClose();
       } else {

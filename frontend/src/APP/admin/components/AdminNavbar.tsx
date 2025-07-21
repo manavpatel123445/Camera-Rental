@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { FaBars, FaBell, FaUserCircle, FaSearch, FaMoon, FaSun, FaCog, FaSignOutAlt, FaSignInAlt, FaQuestionCircle, FaUniversalAccess, FaSlidersH } from 'react-icons/fa';
-import { useTheme } from './ThemeContext';
+
 
 interface AdminNavbarProps {
   onSidebarToggle: () => void;
@@ -13,7 +13,7 @@ const user = {
 };
 
 const AdminNavbar = ({ onSidebarToggle }: AdminNavbarProps) => {
-  const { theme, toggleTheme } = useTheme();
+ 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +33,7 @@ const AdminNavbar = ({ onSidebarToggle }: AdminNavbarProps) => {
 
   return (
     <nav className="fixed top-0 left-0 w-full h-16 bg-[var(--secondary-bg)] flex items-center px-4 shadow border-b border-[var(--border-color)] z-50 text-[var(--text-primary)]">
-      {/* Hamburger + Logo */}
+     
       <div className="flex items-center gap-3">
         <button
           className="text-[var(--text-secondary)] text-2xl focus:outline-none mr-2 md:mr-4 hover:text-[var(--text-primary)] transition"

@@ -86,7 +86,7 @@ const UpdateProductModal = ({ isOpen, onClose, product, onUpdated }: any) => {
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="Category"
                 value={form.category}
-                onChange={handleChange}
+                onChange={handleChange} 
                 required
               />
             </div>

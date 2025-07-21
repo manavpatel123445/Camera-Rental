@@ -11,13 +11,12 @@ import {
   faShieldAlt,
   faCog,
   faSignOutAlt,
-  faCamera,
-  faChartLine,
-  faBoxes,
-  faUsers} from '@fortawesome/free-solid-svg-icons';
+  faCamera
+} from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import AdminLayout from '../components/AdminLayout';
 import { fetchAdminProfile, setAdminUser, logout } from '../../auth/authSlice';
+import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '../../../components/ui';
 
 const AdminProfile = () => {
   const admin = useSelector((state: any) => state.auth.user);
@@ -35,7 +34,6 @@ const AdminProfile = () => {
     dateOfBirth: '',
   });
 
-  // Initialize form data when admin data is available and fetch fresh profile data
   useEffect(() => {
     if (admin) {
       setFormData({
@@ -53,13 +51,7 @@ const AdminProfile = () => {
     }
   }, [admin, dispatch]);
 
-  // Mock statistics data - replace with real data from your backend
-  const stats = [
-    { title: 'Total Orders', value: '1,234', icon: faBoxes, color: 'bg-blue-500' },
-    { title: 'Active Users', value: '567', icon: faUsers, color: 'bg-green-500' },
-    { title: 'Revenue', value: '$45,678', icon: faChartLine, color: 'bg-purple-500' },
-    { title: 'Products', value: '89', icon: faBoxes, color: 'bg-orange-500' },
-  ];
+
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -124,15 +116,7 @@ const AdminProfile = () => {
     setShowDatePicker(false);
   };
 
-  const formatDateForDisplay = (dateString: string) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  
 
   const formatDateForInput = (dateString: string) => {
     if (!dateString) return '';
@@ -204,27 +188,12 @@ const AdminProfile = () => {
             <p className="text-gray-600">Manage your profile and view system statistics</p>
           </div>
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
-                  </div>
-                  <div className={`${stat.color} p-3 rounded-lg`}>
-                    <FontAwesomeIcon icon={stat.icon} className="text-white text-xl" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Profile Card */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <Card className="overflow-hidden">
                 {/* Profile Header */}
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white text-center">
                   <div className="relative inline-block">
@@ -265,7 +234,7 @@ const AdminProfile = () => {
                 </div>
 
                 {/* Profile Actions */}
-                <div className="p-6 space-y-4">
+                <CardContent className="p-6 space-y-4">
                   <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                     <FontAwesomeIcon icon={faShieldAlt} className="text-blue-500" />
                     <span className="text-gray-700">Administrator</span>
@@ -278,170 +247,178 @@ const AdminProfile = () => {
                     <FontAwesomeIcon icon={faCog} className="text-gray-500" />
                     <span className="text-gray-700">Settings</span>
                   </div>
-                  <button
+                  <Button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+                    variant="ghost"
+                    className="w-full flex items-center gap-3 p-3 text-red-600 hover:bg-red-50"
                   >
                     <FontAwesomeIcon icon={faSignOutAlt} />
                     <span>Logout</span>
-                  </button>
-                </div>
-              </div>
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Profile Form */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800">Profile Information</h3>
-                  {!isEditing ? (
-                    <button
-                      onClick={handleEdit}
-                      className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md transition-colors"
-                    >
-                      <FontAwesomeIcon icon={faEdit} />
-                      Edit Profile
-                    </button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleSave}
-                        className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-md transition-colors"
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-2xl font-bold text-gray-800">Profile Information</CardTitle>
+                    {!isEditing ? (
+                      <Button
+                        onClick={handleEdit}
+                        variant="gradient"
+                        className="flex items-center gap-2"
                       >
-                        <FontAwesomeIcon icon={faSave} />
-                        Save Changes
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow-md transition-colors"
-                      >
-                        <FontAwesomeIcon icon={faTimes} />
-                        Cancel
-                      </button>
-                    </div>
-                  )}
-                </div>
+                        <FontAwesomeIcon icon={faEdit} />
+                        Edit Profile
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleSave}
+                          variant="default"
+                          className="flex items-center gap-2 bg-green-500 hover:bg-green-600"
+                        >
+                          <FontAwesomeIcon icon={faSave} />
+                          Save Changes
+                        </Button>
+                        <Button
+                          onClick={handleCancel}
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          <FontAwesomeIcon icon={faTimes} />
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
 
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardContent>
+                  <form className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block font-semibold mb-2 text-gray-700">First Name</label>
+                        <Input
+                          type="text"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          placeholder="Enter first name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-2 text-gray-700">Last Name</label>
+                        <Input
+                          type="text"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          placeholder="Enter last name"
+                        />
+                      </div>
+                    </div>
+
                     <div>
-                      <label className="block font-semibold mb-2 text-gray-700">First Name</label>
-                      <input
+                      <label className="block font-semibold mb-2 text-gray-700">Username</label>
+                      <Input
                         type="text"
-                        name="firstName"
-                        value={formData.firstName}
+                        name="username"
+                        value={formData.username}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
                         disabled={!isEditing}
-                        placeholder="Enter first name"
+                        placeholder="Enter username"
                       />
                     </div>
+
                     <div>
-                      <label className="block font-semibold mb-2 text-gray-700">Last Name</label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
+                      <label className="block font-semibold mb-2 text-gray-700">Email Address</label>
+                      <Input
+                        type="email"
+                        name="email"
+                        value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
                         disabled={!isEditing}
-                        placeholder="Enter last name"
+                        placeholder="Enter email address"
                       />
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block font-semibold mb-2 text-gray-700">Username</label>
-                    <input
-                      type="text"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
-                      disabled={!isEditing}
-                      placeholder="Enter username"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-semibold mb-2 text-gray-700">Phone Number</label>
+                      <Input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        placeholder="Enter phone number"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-semibold mb-2 text-gray-700">Email Address</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
-                      disabled={!isEditing}
-                      placeholder="Enter email address"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-semibold mb-2 text-gray-700">Date of Birth</label>
+                      <Input
+                        type="date"
+                        name="dateOfBirth"
+                        value={formatDateForInput(formData.dateOfBirth)}
+                        onChange={handleDateChange}
+                        disabled={!isEditing}
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-semibold mb-2 text-gray-700">Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
-                      disabled={!isEditing}
-                      placeholder="Enter phone number"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-semibold mb-2 text-gray-700">Bio</label>
+                      <textarea
+                        name="bio"
+                        value={formData.bio}
+                        onChange={handleInputChange}
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all resize-none"
+                        disabled={!isEditing}
+                        placeholder="Tell us about yourself..."
+                      />
+                    </div>
+                  </form>
 
-                  <div>
-                    <label className="block font-semibold mb-2 text-gray-700">Date of Birth</label>
-                    <input
-                      type="date"
-                      name="dateOfBirth"
-                      value={formatDateForInput(formData.dateOfBirth)}
-                      onChange={handleDateChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
-                      disabled={!isEditing}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold mb-2 text-gray-700">Bio</label>
-                    <textarea
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleInputChange}
-                      rows={4}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all resize-none"
-                      disabled={!isEditing}
-                      placeholder="Tell us about yourself..."
-                    />
-                  </div>
-                </form>
-
-                {/* Additional Actions */}
+                                  {/* Additional Actions */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <h4 className="text-lg font-semibold text-gray-800 mb-4">Account Actions</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Link
-                      to="/admin/change-password"
-                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <FontAwesomeIcon icon={faShieldAlt} className="text-blue-500" />
-                      <div>
-                        <p className="font-medium text-gray-800">Change Password</p>
-                        <p className="text-sm text-gray-600">Update your account password</p>
-                      </div>
-                    </Link>
-                    <Link
-                      to="/admin/settings"
-                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <FontAwesomeIcon icon={faCog} className="text-gray-500" />
-                      <div>
-                        <p className="font-medium text-gray-800">Account Settings</p>
-                        <p className="text-sm text-gray-600">Manage your account preferences</p>
-                      </div>
-                    </Link>
+                    <Card className="hover:shadow-md transition-shadow">
+                      <Link to="/admin/change-password">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            <FontAwesomeIcon icon={faShieldAlt} className="text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-800">Change Password</p>
+                              <p className="text-sm text-gray-600">Update your account password</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Link>
+                    </Card>
+                    <Card className="hover:shadow-md transition-shadow">
+                      <Link to="/admin/settings">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            <FontAwesomeIcon icon={faCog} className="text-gray-500" />
+                            <div>
+                              <p className="font-medium text-gray-800">Account Settings</p>
+                              <p className="text-sm text-gray-600">Manage your account preferences</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Link>
+                    </Card>
                   </div>
                 </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
