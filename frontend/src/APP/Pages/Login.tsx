@@ -27,6 +27,7 @@ const Login: React.FC = () => {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
+      console.log('LOGIN RESPONSE:', data); // Debug: log the backend response
       if (res.ok && data.token) {
         dispatch(setUser({
           username: data.username || '',

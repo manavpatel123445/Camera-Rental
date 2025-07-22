@@ -114,9 +114,11 @@ const Home: React.FC = () => {
           {user ? (
             <>
               <span className="text-purple-300 font-semibold">{user.username}</span>
-              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2">
-                <span className="font-bold text-lg">P</span>
-              </div>
+              <Link to="/profile">
+                <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2 cursor-pointer">
+                  <span className="font-bold text-lg">P</span>
+                </div>
+              </Link>
               <Button
                 className="border border-purple-500 text-purple-400 bg-transparent hover:bg-purple-500 hover:text-white font-semibold px-6 py-2 rounded-lg"
                 onClick={handleLogout}
@@ -132,9 +134,6 @@ const Home: React.FC = () => {
               >
                 Login
               </Button>
-              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2">
-                <span className="font-bold text-lg">P</span>
-              </div>
             </>
           )}
         </div>

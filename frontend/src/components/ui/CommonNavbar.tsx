@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './Button';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../APP/store';
 
 interface NavLink {
   label: string;
@@ -27,6 +30,7 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
   className = '',
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const user = useSelector((state: RootState) => state.userAuth.user);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -59,9 +63,9 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
       </span>
       <div className="flex gap-8 items-center">
         {navLinks.map(link => (
-          <a key={link.href} href={link.href} className="hover:text-purple-400 transition text-white">
+          <Link key={link.href} to={link.href} className="hover:text-purple-400 transition text-white">
             {link.label}
-          </a>
+          </Link>
         ))}
       </div>
       <div className="flex gap-4 items-center">
@@ -90,9 +94,21 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
             Login
           </Button>
         )}
-        <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
-          <span className="font-bold text-lg text-white">P</span>
-        </div>
+        {user && (
+          <Link to="/profile">
+            <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2 cursor-pointer overflow-hidden">
+              {user.avatar ? (
+                <img
+                  src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000/${user.avatar}`}
+                  alt="avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="font-bold text-lg text-white">P</span>
+              )}
+            </div>
+          </Link>
+        )}
       </div>
     </nav>
   );

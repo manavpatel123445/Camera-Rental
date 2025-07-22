@@ -4,7 +4,6 @@ import {
   ProductCard, 
   Button, 
   Card, 
-  CardContent, 
   CardDescription, 
   CardHeader, 
   CardTitle,

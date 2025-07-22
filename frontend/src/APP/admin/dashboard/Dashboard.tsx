@@ -1,6 +1,5 @@
 
 
-import { useSelector } from 'react-redux';
 import AdminLayout from '../components/AdminLayout';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,7 +13,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 const Dashboard = () => {
-  const admin = useSelector((state: any) => state.auth.user);
   
   // Mock data for the dashboard
   const satisfactionData = [
