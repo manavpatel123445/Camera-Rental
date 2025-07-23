@@ -12,50 +12,25 @@ import {
 
 } from '@fortawesome/free-solid-svg-icons';
 
+import { useEffect, useState } from 'react';
+
 const Dashboard = () => {
+  const [productStats, setProductStats] = useState({ total: 0, cameras: 0, lenses: 0, accessories: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/products/stats');
+        const data = await res.json();
+        setProductStats(data);
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+    fetchStats();
+  }, []);
   
-  // Mock data for the dashboard
-  const satisfactionData = [
-    { label: 'Satisfied', percentage: 100 },
-    { label: 'Neutral', percentage: 60 },
-    { label: 'Dissatisfied', percentage: 80 }
-  ];
-
-  const salesData = [
-    { label: 'Cameras', percentage: 80 },
-    { label: 'Lenses', percentage: 60 },
-    { label: 'Drones', percentage: 70 }
-  ];
-
-  const summaryCards = [
-    { title: 'Average Rental Price', value: '$150' },
-    { title: 'Total Products Rented', value: '500' },
-    { title: 'Revenue Generated', value: '$75,000' }
-  ];
-
-  const newProducts = [
-    {
-      id: 1,
-      name: 'Camera Model X',
-      image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=40&h=40&fit=crop&crop=center',
-      status: 'Success',
-      price: '$200'
-    },
-    {
-      id: 2,
-      name: 'Lens 50mm',
-      image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=40&h=40&fit=crop&crop=center',
-      status: 'Pending',
-      price: '$100'
-    },
-    {
-      id: 3,
-      name: 'Drone Pro',
-      image: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=40&h=40&fit=crop&crop=center',
-      status: 'Canceled',
-      price: '$300'
-    }
-  ];
+  // Remove all mock/static product data arrays and only keep the API-driven product stats and the rest of the dashboard UI.
 
   const feedItems = [
     {
@@ -94,9 +69,25 @@ const Dashboard = () => {
   return (
     <AdminLayout>
       <div className="min-h-screen bg-gray-50">
-      
-
-       
+        {/* Product Stats Summary */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 mt-10">
+          <div className="bg-white p-6 rounded-xl text-center shadow">
+            <div className="text-3xl font-bold ">{productStats.total}</div>
+            <div className="text-gray-500 mt-2">Total Products</div>
+          </div>
+          <div className="bg-white p-6 rounded-xl text-center shadow">
+            <div className="text-3xl font-bold ">{productStats.cameras}</div>
+            <div className="text-gray-500 mt-2">Cameras</div>
+          </div>
+          <div className="bg-white p-6 rounded-xl text-center shadow">
+            <div className="text-3xl font-bold ">{productStats.lenses}</div>
+            <div className="text-gray-500 mt-2">Lenses</div>
+          </div>
+          <div className="bg-white p-6 rounded-xl text-center shadow">
+            <div className="text-3xl font-bold">{productStats.accessories}</div>
+            <div className="text-gray-500 mt-2">Accessories</div>
+          </div>
+        </div>
 
           {/* Main Content */}
           <div className="flex-1 p-4">
@@ -117,17 +108,7 @@ const Dashboard = () => {
                     <p className="text-green-600 text-base font-medium">+5%</p>
                   </div>
                   <div className="grid gap-y-4 py-3">
-                    {satisfactionData.map((item, index) => (
-                      <div key={index} className="grid grid-cols-[auto_1fr] gap-4 items-center">
-                        <p className="text-gray-600 text-sm font-bold">{item.label}</p>
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gray-400 rounded-full" 
-                            style={{ width: `${item.percentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
+                    {/* This section was removed as per the edit hint */}
                   </div>
                 </div>
 
@@ -140,29 +121,14 @@ const Dashboard = () => {
                     <p className="text-green-600 text-base font-medium">+3%</p>
                   </div>
                   <div className="grid gap-y-4 py-3">
-                    {salesData.map((item, index) => (
-                      <div key={index} className="grid grid-cols-[auto_1fr] gap-4 items-center">
-                        <p className="text-gray-600 text-sm font-bold">{item.label}</p>
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gray-400 rounded-full" 
-                            style={{ width: `${item.percentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
+                    {/* This section was removed as per the edit hint */}
                   </div>
                 </div>
               </div>
 
               {/* Summary Cards */}
               <div className="flex flex-wrap gap-4 mb-8">
-                {summaryCards.map((card, index) => (
-                  <div key={index} className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 bg-white shadow-sm border border-gray-200">
-                    <p className="text-gray-800 text-base font-medium">{card.title}</p>
-                    <p className="text-gray-800 text-2xl font-bold">{card.value}</p>
-                  </div>
-                ))}
+                {/* This section was removed as per the edit hint */}
               </div>
 
               {/* New Products Table */}
@@ -180,30 +146,7 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {newProducts.map((product) => (
-                        <tr key={product.id} className="border-t border-gray-200">
-                          <td className="h-[72px] px-4 py-2">
-                            <div
-                              className="w-10 h-10 rounded-full bg-cover bg-center"
-                              style={{ backgroundImage: `url(${product.image})` }}
-                            ></div>
-                          </td>
-                          <td className="h-[72px] px-4 py-2 text-gray-800 text-sm">
-                            {product.name}
-                          </td>
-                          <td className="h-[72px] px-4 py-2">
-                            <button className={`flex min-w-[84px] items-center justify-center rounded-xl h-8 px-4 text-sm font-medium w-full ${getStatusColor(product.status)}`}>
-                              {product.status}
-                            </button>
-                          </td>
-                          <td className="h-[72px] px-4 py-2 text-gray-600 text-sm">
-                            {product.price}
-                          </td>
-                          <td className="h-[72px] px-4 py-2 text-gray-600 text-sm font-bold">
-                            Edit, Delete
-                          </td>
-                        </tr>
-                      ))}
+                      {/* This section was removed as per the edit hint */}
                     </tbody>
                   </table>
                 </div>

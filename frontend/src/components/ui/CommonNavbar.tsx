@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Button } from './Button';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../APP/store';
+import { FaShoppingCart } from 'react-icons/fa';
+import CartModal from './CartModal';
+import { removeFromCart, updateQuantity, updateRentalDays } from '../../APP/cart/cartSlice';
 
 interface NavLink {
   label: string;
@@ -26,11 +29,15 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
     { label: 'Support', href: '/support' },
   ],
   showRentNow = true,
-  showSearch = true,
+
   className = '',
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const user = useSelector((state: RootState) => state.userAuth.user);
+  const cart = useSelector((state: RootState) => state.cart.items);
+  const dispatch = useDispatch();
+  const [cartOpen, setCartOpen] = useState(false);
+  const cartTotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -69,16 +76,8 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
         ))}
       </div>
       <div className="flex gap-4 items-center">
-        {showSearch && (
-          <input
-            type="text"
-            placeholder="Search"
-            className="bg-[#232136] text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-gray-400"
-          />
-        )}
-        {showRentNow && (
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg">Rent Now</Button>
-        )}
+       
+      
         {isLoggedIn ? (
           <Button
             className="border border-purple-500 text-purple-400 bg-transparent hover:bg-purple-500 hover:text-white font-semibold px-6 py-2 rounded-lg"
@@ -109,6 +108,28 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
             </div>
           </Link>
         )}
+        {/* Cart Icon and Modal remain unchanged */}
+        <button
+          className="relative text-2xl text-white hover:text-purple-400 transition"
+          onClick={() => setCartOpen(true)}
+          aria-label="Open cart"
+        >
+          <FaShoppingCart />
+          {cart.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
+              {cart.length}
+            </span>
+          )}
+        </button>
+        <CartModal
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          cart={cart}
+          onRemove={id => dispatch(removeFromCart(id))}
+          total={cartTotal}
+          onUpdateQuantity={(id, qty) => dispatch(updateQuantity({ id, quantity: qty }))}
+          onUpdateRentalDays={(id, days) => dispatch(updateRentalDays({ id, rentalDays: days }))}
+        />
       </div>
     </nav>
   );

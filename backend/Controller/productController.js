@@ -78,4 +78,17 @@ export const deleteProduct = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Server error.", error: err.message });
   }
+};
+
+export const getProductStats = async (req, res) => {
+  try {
+    const products = await Product.find();
+    const total = products.length;
+    const cameras = products.filter(p => p.category?.toLowerCase() === 'camera').length;
+    const lenses = products.filter(p => p.category?.toLowerCase() === 'lens').length;
+    const accessories = products.filter(p => p.category?.toLowerCase().includes('accessor')).length;
+    res.json({ total, cameras, lenses, accessories });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
 }; 

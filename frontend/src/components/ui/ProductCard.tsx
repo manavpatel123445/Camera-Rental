@@ -29,11 +29,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   return (
     <div className={cn(
-      "group relative bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300",
+      // Updated for dark card style
+      "group relative bg-slate-800 rounded-xl shadow-sm border border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 text-white",
       className
     )}>
       {/* 3D Model or Image */}
-      <div className="relative h-48 w-full overflow-hidden bg-gray-100 rounded-t-xl flex items-center justify-center">
+      <div className="relative h-48 w-full overflow-hidden bg-white rounded-t-xl flex items-center justify-center">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -53,7 +54,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Category Badge */}
       <div className="absolute top-3 left-3">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-600 text-white">
           {product.category}
         </span>
       </div>
@@ -63,8 +64,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <span className={cn(
           "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
           product.quantity > 0 
-            ? "bg-green-100 text-green-800" 
-            : "bg-red-100 text-red-800"
+            ? "bg-green-500 text-white" 
+            : "bg-red-500 text-white"
         )}>
           {product.quantity > 0 ? `${product.quantity} available` : 'Out of stock'}
         </span>
@@ -72,22 +73,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-purple-400 transition-colors">
           {product.name}
         </h3>
         
         {product.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-gray-300 mb-3 line-clamp-2">
             {product.description}
           </p>
         )}
         
         <div className="flex items-center justify-between">
           <div className="flex items-baseline">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-white">
               ${product.pricePerDay}
             </span>
-            <span className="text-sm text-gray-500 ml-1">/day</span>
+            <span className="text-sm text-gray-400 ml-1">/day</span>
           </div>
           
           <div className="flex gap-2">

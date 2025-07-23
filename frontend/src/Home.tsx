@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './components/ui/Button';
-import ProductCard from './components/ui/ProductCard';
 import toast from 'react-hot-toast';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from './APP/store';
-import { logout } from './APP/userAuth/userAuthSlice';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import CartModal from './components/ui/CartModal';
+import CommonNavbar from './components/ui/CommonNavbar';
+import { addToCart } from './APP/cart/cartSlice';
 
 const Home: React.FC = () => {
-  const user = useSelector((state: RootState) => state.userAuth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -36,108 +35,26 @@ const Home: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const handleLogin = () => {
-    navigate('/login');
+
+
+  const handleAddToCart = (product: any) => {
+    dispatch(addToCart({
+      _id: product._id,
+      name: product.name,
+      pricePerDay: product.pricePerDay,
+      quantity: 1,
+      image: product.image,
+      rentalDays: 1,
+    }));
+    toast.success('Added to cart!');
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success('Logged out successfully!');
-    navigate('/login');
-  };
+  const cart = useSelector((state: RootState) => state.cart.items);
+  const cartTotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
 
   return (
-    <div className="min-h-screen bg-[#181622] text-white flex flex-col">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-4 md:px-8 py-4 bg-[#181622] relative">
-        <span className="text-2xl font-bold tracking-tight">LensRentals</span>
-        {/* Desktop Nav */}
-        <div className="hidden md:flex gap-8 items-center">
-          <Link to="/" className="hover:text-purple-400 transition">Home</Link>
-          <Link to="/cameras" className="hover:text-purple-400 transition">Cameras</Link>
-          <Link to="/lenses" className="hover:text-purple-400 transition">Lenses</Link>
-          <Link to="/accessories" className="hover:text-purple-400 transition">Accessories</Link>
-          <Link to="/support" className="hover:text-purple-400 transition">Support</Link>
-        </div>
-        {/* Burger Icon */}
-        <button
-          className="md:hidden text-2xl text-white"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Open menu"
-        >
-          {menuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="absolute top-16 left-0 w-full bg-[#232136] flex flex-col items-center gap-6 py-6 z-50 md:hidden">
-            <Link to="/" onClick={() => setMenuOpen(false)} className="hover:text-purple-400 transition">Home</Link>
-            <Link to="/cameras" onClick={() => setMenuOpen(false)} className="hover:text-purple-400 transition">Cameras</Link>
-            <Link to="/lenses" onClick={() => setMenuOpen(false)} className="hover:text-purple-400 transition">Lenses</Link>
-            <Link to="/accessories" onClick={() => setMenuOpen(false)} className="hover:text-purple-400 transition">Accessories</Link>
-            <Link to="/support" onClick={() => setMenuOpen(false)} className="hover:text-purple-400 transition">Support</Link>
-            {user ? (
-              <>
-                <span className="text-purple-300 font-semibold">{user.username}</span>
-                <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2">
-                  <span className="font-bold text-lg">P</span>
-                </div>
-                <Button
-                  className="border border-purple-500 text-purple-400 bg-transparent hover:bg-purple-500 hover:text-white font-semibold px-6 py-2 rounded-lg"
-                  onClick={() => { setMenuOpen(false); handleLogout(); }}
-                >
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  className="border border-purple-500 text-purple-400 bg-transparent hover:bg-purple-500 hover:text-white font-semibold px-6 py-2 rounded-lg"
-                  onClick={() => { setMenuOpen(false); handleLogin(); }}
-                >
-                  Login
-                </Button>
-                <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2">
-                  <span className="font-bold text-lg">P</span>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-        {/* Desktop User/Actions */}
-        <div className="hidden md:flex gap-4 items-center">
-          <input
-            type="text"
-            placeholder="Search"
-            className="bg-[#232136] text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-gray-400"
-          />
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg">Rent Now</Button>
-          {user ? (
-            <>
-              <span className="text-purple-300 font-semibold">{user.username}</span>
-              <Link to="/profile">
-                <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2 cursor-pointer">
-                  <span className="font-bold text-lg">P</span>
-                </div>
-              </Link>
-              <Button
-                className="border border-purple-500 text-purple-400 bg-transparent hover:bg-purple-500 hover:text-white font-semibold px-6 py-2 rounded-lg"
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                className="border border-purple-500 text-purple-400 bg-transparent hover:bg-purple-500 hover:text-white font-semibold px-6 py-2 rounded-lg"
-                onClick={handleLogin}
-              >
-                Login
-              </Button>
-            </>
-          )}
-        </div>
-      </nav>
+    <div className="min-h-screen bg-[#0F172A] text-white flex flex-col">
+      <CommonNavbar />
 
       {/* Hero Section */}
       <section className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-8 md:py-16 bg-[#181622] gap-8 md:gap-12">
@@ -165,16 +82,30 @@ const Home: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {products.slice(0, 8).map((product: any) => (
-              <ProductCard key={product._id} product={{
-                id: product._id,
-                name: product.name,
-                category: product.category,
-                pricePerDay: product.pricePerDay,
-                description: product.description,
-                imageUrl: product.image,
-                quantity: product.quantity,
-              }} />
-            ))}
+              <div key={product._id} className="bg-[#1E293B] rounded-2xl shadow p-6 flex flex-col items-start">
+                <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-white flex items-center justify-center cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
+                  <img
+                    src={product.image?.startsWith('http') ? product.image : `http://localhost:3000/${product.image}`}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex items-center gap-2 mb-2 w-full">
+                  <h3 className="text-lg font-bold flex-1 text-white truncate" title={product.name}>{product.name}</h3>
+                  <span className="px-3 py-1 rounded-full bg-purple-400 text-purple-700 text-xs font-semibold capitalize">
+                    {product.category}
+                  </span>
+                </div>
+                <div className="text-gray-500 text-sm mb-4 truncate max-w-full" title={product.description}>{product.description}</div>
+                <div className="flex items-center justify-between w-full mb-4">
+                  <span className="text-2xl font-bold text-white">${product.pricePerDay}</span>
+                  <span className="text-gray-400 text-xs">/day</span>
+                </div>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg w-full" onClick={() => handleAddToCart(product)}>
+                  Add to Cart
+                </Button>
+              </div>
+          ))}
           </div>
         )}
         <Button className="mt-6 w-max bg-[#232136] border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white font-semibold px-6 py-2 rounded-lg">View All Gear</Button>
@@ -190,6 +121,17 @@ const Home: React.FC = () => {
         </div>
         <div>&copy; {new Date().getFullYear()} LensRentals. All rights reserved.</div>
       </footer>
+
+      {/* Cart Modal */}
+      <CartModal
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+        cart={cart}
+        onRemove={() => {}}
+        total={cartTotal}
+        onUpdateQuantity={() => {}}
+        onUpdateRentalDays={() => {}}
+      />
     </div>
   );
 };

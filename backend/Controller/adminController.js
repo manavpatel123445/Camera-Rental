@@ -5,6 +5,7 @@ import crypto from "crypto";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import User from "../module/User.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
@@ -293,5 +294,31 @@ export const deleteProfileImage = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: "Server error.", error: err.message });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Server error.", error: err.message });
+  }
+};
+
+export const updateUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!['active', 'disabled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value.' });
+    }
+    const user = await User.findByIdAndUpdate(id, { status }, { new: true });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    res.json({ message: `User status updated to ${status}.`, user });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
   }
 };

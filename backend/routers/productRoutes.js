@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct } from "../Controller/productController.js";
+import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct, getProductStats } from "../Controller/productController.js";
 import { adminAuth } from "../middleware/authMiddleware.js";
 import multer from "multer";
 
@@ -10,6 +10,7 @@ const router = express.Router();
 
 // Public
 router.get("/", getAllProducts);
+router.get("/stats", getProductStats);
 router.get("/:id", getProductById);
 
 // Admin only

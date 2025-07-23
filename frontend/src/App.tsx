@@ -14,12 +14,17 @@ import { useDispatch } from 'react-redux';
 import { fetchAdminProfile } from './APP/auth/authSlice';
 import ProductList from './APP/admin/products/ProductList';
 import AddProduct from './APP/admin/products/AddProduct';
-import ProductDetail from './APP/admin/products/ProductDetail';
+import ProductDetail from './APP/Pages/ProductDetail';
 import { ThemeProvider } from './APP/admin/components/ThemeContext';
 import Home from './Home';
 import Login from './APP/Pages/Login';
 import Register from './APP/Pages/Register';
 import UserProfile from './APP/Pages/UserProfile';
+import CameraProducts from './APP/Pages/CameraProducts';
+import LensProducts from './APP/Pages/LensProducts';
+import AccessoryProducts from './APP/Pages/AccessoryProducts';
+import Checkout from './APP/Pages/Checkout';
+import UsersList from './APP/admin/users/UsersList';
 
 
 function App() {
@@ -52,6 +57,18 @@ function App() {
           <AdminProfile />
         </ProtectedRoute>
       } />
+      
+      <Route path="/admin/profile" element={
+        <ProtectedRoute>
+          <AdminProfile />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/admin/users" element={
+        <ProtectedRoute>
+          <UsersList />
+        </ProtectedRoute>
+      } />
     
       <Route path="/admin/products" element={
         <ProtectedRoute>
@@ -68,6 +85,11 @@ function App() {
           <ProductDetail />
         </ProtectedRoute>
       } />
+      <Route path="/product/:id" element={<ProductDetail />} />
+      <Route path="/cameras" element={<CameraProducts />} />
+      <Route path="/lenses" element={<LensProducts />} />
+      <Route path="/accessories" element={<AccessoryProducts />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/profile" element={<UserProfile />} />
 
        

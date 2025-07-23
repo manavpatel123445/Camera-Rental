@@ -95,6 +95,10 @@ export const loginUser = async (req, res) => {
     if (!user)
       return res.status(401).json({ message: "Invalid credentials." });
 
+    if (user.status === 'disabled') {
+      return res.status(403).json({ message: 'Your account is disabled. Please contact support.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(401).json({ message: "Invalid credentials." });
