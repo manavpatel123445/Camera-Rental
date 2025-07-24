@@ -9,7 +9,7 @@ interface CartItem {
   pricePerDay: number;
   quantity: number;
   image?: string;
-  rentalDays?: number;
+  // rentalDays?: number; // Remove rentalDays
 }
 
 interface CartModalProps {
@@ -19,15 +19,14 @@ interface CartModalProps {
   onRemove: (id: string) => void;
   total: number;
   onUpdateQuantity?: (id: string, qty: number) => void;
-  onUpdateRentalDays?: (id: string, days: number) => void;
+  // onUpdateRentalDays?: (id: string, days: number) => void; // Remove
 }
 
-const rentalOptions = [1, 2, 3, 5, 7, 14, 30];
 const TAX_RATE = 0;
 
-const CartModal: React.FC<CartModalProps> = ({ open, onClose, cart, onRemove, onUpdateQuantity, onUpdateRentalDays }) => {
+const CartModal: React.FC<CartModalProps> = ({ open, onClose, cart, onRemove, onUpdateQuantity }) => {
   if (!open) return null;
-  const subtotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
+  const subtotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity, 0); // Remove rentalDays
   const tax = subtotal * TAX_RATE;
   const grandTotal = subtotal + tax;
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -71,23 +70,12 @@ const CartModal: React.FC<CartModalProps> = ({ open, onClose, cart, onRemove, on
                           onClick={() => onUpdateQuantity && onUpdateQuantity(item._id, item.quantity + 1)}
                         >+</button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-sm">Rental Days:</span>
-                        <select
-                          className="bg-[#334155] text-white rounded px-2 py-1"
-                          value={item.rentalDays || 1}
-                          onChange={e => onUpdateRentalDays && onUpdateRentalDays(item._id, Number(e.target.value))}
-                        >
-                          {rentalOptions.map(opt => (
-                            <option key={opt} value={opt}>{opt} day{opt > 1 ? 's' : ''}</option>
-                          ))}
-                        </select>
-                      </div>
+                      {/* Remove rental days select */}
                     </div>
-                    <div className="text-gray-400 text-sm">${item.pricePerDay}/day × {item.quantity} × {item.rentalDays || 1} day(s)</div>
+                    <div className="text-gray-400 text-sm">${item.pricePerDay}/day × {item.quantity}</div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <div className="font-bold text-white text-lg">${item.pricePerDay * item.quantity * (item.rentalDays || 1)}</div>
+                    <div className="font-bold text-white text-lg">${item.pricePerDay * item.quantity}</div>
                     <button
                       className="text-red-400 hover:text-red-600 text-xl"
                       onClick={() => onRemove(item._id)}

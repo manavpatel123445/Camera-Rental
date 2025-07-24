@@ -31,7 +31,7 @@ const AccessoryProducts: React.FC = () => {
   const cart = useSelector((state: RootState) => state.cart.items);
   const cartTotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -196,7 +196,7 @@ const AccessoryProducts: React.FC = () => {
         onRemove={() => {}}
         total={cartTotal}
         onUpdateQuantity={() => {}}
-        onUpdateRentalDays={() => {}}
+        
       />
     </div>
   );

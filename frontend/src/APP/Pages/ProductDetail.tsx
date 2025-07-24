@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import CommonNavbar from '../../components/ui/CommonNavbar';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../cart/cartSlice';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +12,7 @@ const ProductDetail: React.FC = () => {
   const [pickupDate, setPickupDate] = useState('');
   const [dropoffDate, setDropoffDate] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -33,6 +36,46 @@ const ProductDetail: React.FC = () => {
   // Example discount logic
   const originalPrice = product.originalPrice || (product.pricePerDay ? Math.round(product.pricePerDay * 1.6) : 0);
   const discount = product.pricePerDay && originalPrice ? Math.round(100 - (product.pricePerDay / originalPrice) * 100) : 0;
+
+  const handleAddToCart = () => {
+    if (!pickupDate || !dropoffDate) {
+      alert('Please select pickup and drop-off dates.');
+      return;
+    }
+    // Calculate rental days
+    const days = Math.max(1, Math.ceil((new Date(dropoffDate).getTime() - new Date(pickupDate).getTime()) / (1000 * 60 * 60 * 24)));
+    dispatch(addToCart({
+      _id: product._id,
+      name: product.name,
+      pricePerDay: product.pricePerDay,
+      quantity: 1,
+      image: product.image,
+      rentalDays: days,
+      pickupDate,
+      dropoffDate,
+    }));
+    alert('Added to cart!');
+  };
+
+  const handleRentNow = () => {
+    if (!pickupDate || !dropoffDate) {
+      alert('Please select pickup and drop-off dates.');
+      return;
+    }
+    // Calculate rental days
+    const days = Math.max(1, Math.ceil((new Date(dropoffDate).getTime() - new Date(pickupDate).getTime()) / (1000 * 60 * 60 * 24)));
+    dispatch(addToCart({
+      _id: product._id,
+      name: product.name,
+      pricePerDay: product.pricePerDay,
+      quantity: 1,
+      image: product.image,
+      rentalDays: days,
+      pickupDate,
+      dropoffDate,
+    }));
+    navigate('/checkout');
+  };
 
   return (
     <div className="min-h-screen bg-[#181622] flex flex-col  ">
@@ -75,10 +118,10 @@ const ProductDetail: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 mt-2 w-full">
-            <Button className="bg-[#232136] hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg flex-1">
+            <Button className="bg-[#232136] hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg flex-1" onClick={handleRentNow}>
              Rent Now
             </Button>
-            <Button className="bg-[#232136] hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg flex-1">
+            <Button className="bg-[#232136] hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg flex-1" onClick={handleAddToCart}>
               Add to Cart
             </Button>
           </div>

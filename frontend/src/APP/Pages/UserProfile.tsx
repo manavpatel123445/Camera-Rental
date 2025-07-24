@@ -5,7 +5,7 @@ import type { AppDispatch } from '../store';
 import { logout, fetchUserProfile,  setUser } from '../userAuth/userAuthSlice';
 import { FaUserCircle, FaCamera, FaBell, FaMapMarkerAlt, FaHeart, FaCreditCard, FaEdit, FaTimes, FaSave } from 'react-icons/fa';
 import { Button } from '../../components/ui/Button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CommonNavbar from '../../components/ui/CommonNavbar';
 import toast from 'react-hot-toast';
 
@@ -13,6 +13,7 @@ const UserProfile: React.FC = () => {
   const user = useSelector((state: RootState) => state.userAuth.user);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Example stats (replace with real data)
   const stats = [
@@ -61,6 +62,16 @@ const UserProfile: React.FC = () => {
       setAvatarPreview(user.avatar || null);
     }
   }, [user]);
+
+  useEffect(() => {
+    // Set tab from URL query param on mount
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && ['profile', 'address', 'notifications', 'social'].includes(tabParam)) {
+      setTab(tabParam);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleAvatarUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {

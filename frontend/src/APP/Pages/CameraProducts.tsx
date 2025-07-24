@@ -239,7 +239,7 @@ const CameraProducts: React.FC = () => {
         onRemove={() => {}}
         total={cartTotal}
         onUpdateQuantity={() => {}}
-        onUpdateRentalDays={() => {}}
+      
       />
     </div>
   );

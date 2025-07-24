@@ -74,7 +74,7 @@ const Dashboard = () => {
           <div className="bg-white p-6 rounded-xl text-center shadow">
             <div className="text-3xl font-bold ">{productStats.total}</div>
             <div className="text-gray-500 mt-2">Total Products</div>
-          </div>
+            </div>
           <div className="bg-white p-6 rounded-xl text-center shadow">
             <div className="text-3xl font-bold ">{productStats.cameras}</div>
             <div className="text-gray-500 mt-2">Cameras</div>
@@ -87,7 +87,7 @@ const Dashboard = () => {
             <div className="text-3xl font-bold">{productStats.accessories}</div>
             <div className="text-gray-500 mt-2">Accessories</div>
           </div>
-        </div>
+          </div>
 
           {/* Main Content */}
           <div className="flex-1 p-4">

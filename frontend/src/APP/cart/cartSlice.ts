@@ -7,6 +7,8 @@ export interface CartItem {
   quantity: number;
   image?: string;
   rentalDays?: number;
+  pickupDate?: string;
+  dropoffDate?: string;
 }
 
 interface CartState {

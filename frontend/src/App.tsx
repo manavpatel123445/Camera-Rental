@@ -15,7 +15,7 @@ import { fetchAdminProfile } from './APP/auth/authSlice';
 import ProductList from './APP/admin/products/ProductList';
 import AddProduct from './APP/admin/products/AddProduct';
 import ProductDetail from './APP/Pages/ProductDetail';
-import { ThemeProvider } from './APP/admin/components/ThemeContext';
+
 import Home from './Home';
 import Login from './APP/Pages/Login';
 import Register from './APP/Pages/Register';
@@ -25,6 +25,8 @@ import LensProducts from './APP/Pages/LensProducts';
 import AccessoryProducts from './APP/Pages/AccessoryProducts';
 import Checkout from './APP/Pages/Checkout';
 import UsersList from './APP/admin/users/UsersList';
+import UserOrders from './APP/Pages/UserOrders';
+import OrdersList from './APP/admin/orders/OrdersList';
 
 
 function App() {
@@ -33,7 +35,7 @@ function App() {
     dispatch(fetchAdminProfile() as any);
   }, [dispatch]);
   return (
-    <ThemeProvider>
+  
       <Routes>
     
       <Route path="/admin/login" element={<AdminLogin />} />
@@ -91,13 +93,19 @@ function App() {
       <Route path="/accessories" element={<AccessoryProducts />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/profile" element={<UserProfile />} />
+      <Route path="/orders" element={<UserOrders />} />
+      <Route path="/admin/orders" element={
+        <ProtectedRoute>
+          <OrdersList />
+        </ProtectedRoute>
+      } />
 
        
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
     </Routes>
-    </ThemeProvider>
+
   );
 }
 

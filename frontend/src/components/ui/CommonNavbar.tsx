@@ -4,9 +4,10 @@ import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../APP/store';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaListAlt } from 'react-icons/fa';
 import CartModal from './CartModal';
-import { removeFromCart, updateQuantity, updateRentalDays } from '../../APP/cart/cartSlice';
+import { removeFromCart, updateQuantity, updateRentalDays, clearCart } from '../../APP/cart/cartSlice';
+import { logout as userLogout } from '../../APP/userAuth/userAuthSlice';
 
 interface NavLink {
   label: string;
@@ -56,6 +57,9 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('cart');
+    dispatch(clearCart());
+    dispatch(userLogout());
     setIsLoggedIn(false);
     toast.success('Logged out successfully!');
     setTimeout(() => {
@@ -94,19 +98,30 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
           </Button>
         )}
         {user && (
-          <Link to="/profile">
-            <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2 cursor-pointer overflow-hidden">
-              {user.avatar ? (
-                <img
-                  src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000/${user.avatar}`}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="font-bold text-lg text-white">P</span>
-              )}
-            </div>
-          </Link>
+          <>
+            <button
+              className="relative text-2xl text-white hover:text-purple-400 transition mr-2"
+              onClick={() => {
+                window.location.href = '/orders';
+              }}
+              aria-label="Order List"
+            >
+              <FaListAlt />
+            </button>
+            <Link to="/profile">
+              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center ml-2 cursor-pointer overflow-hidden">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000/${user.avatar}`}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="font-bold text-lg text-white">P</span>
+                )}
+              </div>
+            </Link>
+          </>
         )}
         {/* Cart Icon and Modal remain unchanged */}
         <button
@@ -128,7 +143,7 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
           onRemove={id => dispatch(removeFromCart(id))}
           total={cartTotal}
           onUpdateQuantity={(id, qty) => dispatch(updateQuantity({ id, quantity: qty }))}
-          onUpdateRentalDays={(id, days) => dispatch(updateRentalDays({ id, rentalDays: days }))}
+         
         />
       </div>
     </nav>

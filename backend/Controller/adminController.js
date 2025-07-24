@@ -6,10 +6,11 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import User from "../module/User.js";
+import Order from "../module/Order.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
-// Configure multer for file uploads
+// Configure multer for file uploadslnlsdnlb 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = 'uploads/profile-images';
@@ -318,6 +319,56 @@ export const updateUserStatus = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
     res.json({ message: `User status updated to ${status}.`, user });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};
+
+export const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find().populate('user', 'username email').sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findById(req.params.id).populate('user', 'username email');
+    if (!order) return res.status(404).json({ message: 'Order not found.' });
+    const prevStatus = order.status;
+    order.status = status;
+    await order.save();
+    // Send email if status changed to completed
+    if (status === 'completed' && prevStatus !== 'completed' && order.user?.email) {
+      // Configure transporter (use your SMTP credentials)
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.SMTP_USER || 'your_email@gmail.com',
+          pass: process.env.SMTP_PASS || 'your_app_password',
+        },
+      });
+      await transporter.sendMail({
+        from: process.env.SMTP_USER || 'your_email@gmail.com',
+        to: order.user.email,
+        subject: 'Your Camera Rental Order is Complete!',
+        text: `Hi ${order.user.username || ''},\n\nYour order (${order._id}) has been marked as completed. Thank you for using LensRentals!`,
+      });
+    }
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};
+
+export const deleteOrder = async (req, res) => {
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found.' });
+    res.json({ message: 'Order deleted successfully.' });
   } catch (err) {
     res.status(500).json({ message: 'Server error.', error: err.message });
   }

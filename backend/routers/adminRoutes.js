@@ -10,7 +10,10 @@ import {
   deleteProfileImage,
   upload,
   getAllUsers,
-  updateUserStatus
+  updateUserStatus,
+  getAllOrders,
+  updateOrderStatus,
+  deleteOrder
 } from "../Controller/adminController.js";
 import { adminAuth } from "../middleware/authMiddleware.js";
 
@@ -26,5 +29,8 @@ router.post("/profile/image", adminAuth, upload.single('profileImage'), uploadPr
 router.delete("/profile/image", adminAuth, deleteProfileImage);
 router.get("/users", adminAuth, getAllUsers);
 router.patch("/users/:id/status", adminAuth, updateUserStatus);
+router.get("/orders", adminAuth, getAllOrders);
+router.patch("/orders/:id/status", adminAuth, updateOrderStatus);
+router.delete("/orders/:id", adminAuth, deleteOrder);
 
 export default router;

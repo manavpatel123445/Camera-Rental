@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import Order from "../module/Order.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
@@ -142,6 +143,54 @@ export const updateUserProfile = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true }).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found.' });
     res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};
+
+export const createOrder = async (req, res) => {
+  try {
+    const { items, total, startDate, endDate } = req.body;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "Order items required." });
+    }
+    const order = new Order({
+      user: req.user.id,
+      items,
+      total,
+      status: 'pending',
+      startDate,
+      endDate,
+    });
+    await order.save();
+    res.status(201).json(order);
+  } catch (err) {
+    res.status(500).json({ message: "Server error.", error: err.message });
+  }
+};
+
+export const getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user.id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: "Server error.", error: err.message });
+  }
+};
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findOne({ _id: orderId, user: req.user.id });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+    if (order.status === 'cancelled') {
+      return res.status(400).json({ message: 'Order is already cancelled.' });
+    }
+    order.status = 'cancelled';
+    await order.save();
+    res.json({ message: 'Order cancelled successfully.', order });
   } catch (err) {
     res.status(500).json({ message: 'Server error.', error: err.message });
   }

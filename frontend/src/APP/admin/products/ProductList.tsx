@@ -86,7 +86,7 @@ const ProductList = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+      <div className="p-4 md:p-8 max-w-8xl mx-auto w-full">
         <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
           <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[var(--text-primary)]">Product Management</h1>
           <div className="flex gap-2 w-full md:w-auto">

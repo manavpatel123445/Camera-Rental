@@ -114,6 +114,31 @@ export default function Checkout() {
 
   const handleSubmitOrder = async () => {
     setIsProcessing(true);
+    // Create order in backend
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:3000/api/user/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          items: cart.map(item => ({
+            product: item._id,
+            name: item.name,
+            pricePerDay: item.pricePerDay,
+            quantity: item.quantity,
+            image: item.image,
+          })),
+          total: total,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+        }),
+      });
+    } catch (err) {
+      // Optionally show error
+    }
     await new Promise(resolve => setTimeout(resolve, 3000));
     setIsProcessing(false);
     setOrderComplete(true);

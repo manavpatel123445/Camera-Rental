@@ -130,7 +130,7 @@ const Home: React.FC = () => {
         onRemove={() => {}}
         total={cartTotal}
         onUpdateQuantity={() => {}}
-        onUpdateRentalDays={() => {}}
+       
       />
     </div>
   );
