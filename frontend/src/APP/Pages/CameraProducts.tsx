@@ -3,7 +3,7 @@ import CommonNavbar from '../../components/ui/CommonNavbar';
 import { Button } from '../../components/ui/Button';
 import { FaSearch } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../cart/cartSlice';
+import { addToCart, removeFromCart, updateQuantity } from '../cart/cartSlice';
 import toast from 'react-hot-toast';
 import CartModal from '../../components/ui/CartModal';
 import { useSelector } from 'react-redux';
@@ -71,6 +71,15 @@ const CameraProducts: React.FC = () => {
       rentalDays: 1,
     }));
     toast.success('Added to cart!');
+  };
+
+  const handleRemoveFromCart = (id: string) => {
+    dispatch(removeFromCart(id));
+    toast.success('Removed from cart!');
+  };
+
+  const handleUpdateQuantity = (id: string, qty: number) => {
+    dispatch(updateQuantity({ id, quantity: qty }));
   };
 
   // Extract unique brands and subcategories from products
@@ -236,10 +245,9 @@ const CameraProducts: React.FC = () => {
         open={cartOpen}
         onClose={() => setCartOpen(false)}
         cart={cart}
-        onRemove={() => {}}
+        onRemove={handleRemoveFromCart}
         total={cartTotal}
-        onUpdateQuantity={() => {}}
-      
+        onUpdateQuantity={handleUpdateQuantity}
       />
     </div>
   );

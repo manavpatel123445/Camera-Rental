@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema({
   description: { type: String },
   image: { type: String }, // URL or filename
   quantity: { type: Number, required: true, default: 1 },
+  status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
   createdAt: { type: Date, default: Date.now },
 });
 

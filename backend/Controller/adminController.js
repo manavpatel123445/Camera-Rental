@@ -373,3 +373,349 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({ message: 'Server error.', error: err.message });
   }
 };
+
+// Analytics endpoints for dashboard charts
+export const getDashboardAnalytics = async (req, res) => {
+  try {
+    // User analytics
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ status: 'active' });
+    const disabledUsers = await User.countDocuments({ status: 'disabled' });
+    
+    // Order analytics
+    const totalOrders = await Order.countDocuments();
+    const pendingOrders = await Order.countDocuments({ status: 'pending' });
+    const completedOrders = await Order.countDocuments({ status: 'completed' });
+    const cancelledOrders = await Order.countDocuments({ status: 'cancelled' });
+    
+    // Product analytics
+    const Product = (await import('../module/Product.js')).default;
+    const totalProducts = await Product.countDocuments();
+    const cameras = await Product.countDocuments({ category: { $regex: /camera/i } });
+    const lenses = await Product.countDocuments({ category: { $regex: /lens/i } });
+    const accessories = await Product.countDocuments({ category: { $regex: /accessor/i } });
+    
+    // Monthly order trends (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const monthlyOrders = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 },
+          totalRevenue: { $sum: '$total' }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1 }
+      }
+    ]);
+    
+    // Most popular products (by order count)
+    const popularProducts = await Order.aggregate([
+      {
+        $unwind: '$items'
+      },
+      {
+        $group: {
+          _id: '$items.product',
+          orderCount: { $sum: '$items.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$items.pricePerDay', '$items.quantity'] } }
+        }
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'product'
+        }
+      },
+      {
+        $unwind: '$product'
+      },
+      {
+        $project: {
+          name: '$product.name',
+          category: '$product.category',
+          orderCount: 1,
+          totalRevenue: 1,
+          image: '$product.image'
+        }
+      },
+      {
+        $sort: { orderCount: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+    
+    // User registration trends (last 6 months)
+    const monthlyRegistrations = await User.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1 }
+      }
+    ]);
+    
+    // Cart analytics (most saved products)
+    const mostSavedProducts = await Product.aggregate([
+      {
+        $project: {
+          name: 1,
+          category: 1,
+          pricePerDay: 1,
+          image: 1,
+          // This would need to be implemented based on your cart/save functionality
+          saveCount: { $ifNull: ['$saveCount', 0] }
+        }
+      },
+      {
+        $sort: { saveCount: -1 }
+      },
+      {
+        $limit: 5
+      }
+    ]);
+    
+    res.json({
+      users: {
+        total: totalUsers,
+        active: activeUsers,
+        disabled: disabledUsers
+      },
+      orders: {
+        total: totalOrders,
+        pending: pendingOrders,
+        completed: completedOrders,
+        cancelled: cancelledOrders
+      },
+      products: {
+        total: totalProducts,
+        cameras,
+        lenses,
+        accessories
+      },
+      trends: {
+        monthlyOrders,
+        monthlyRegistrations
+      },
+      popularProducts,
+      mostSavedProducts
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};
+
+export const getOrderAnalytics = async (req, res) => {
+  try {
+    const { period = '30' } = req.query;
+    const days = parseInt(period);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    
+    // Daily order trends
+    const dailyOrders = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+            day: { $dayOfMonth: '$createdAt' }
+          },
+          count: { $sum: 1 },
+          revenue: { $sum: '$total' }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
+      }
+    ]);
+    
+    // Order status distribution
+    const statusDistribution = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    // Top products by revenue
+    const topProducts = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $unwind: '$items'
+      },
+      {
+        $group: {
+          _id: '$items.product',
+          totalRevenue: { $sum: { $multiply: ['$items.pricePerDay', '$items.quantity'] } },
+          totalQuantity: { $sum: '$items.quantity' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'product'
+        }
+      },
+      {
+        $unwind: '$product'
+      },
+      {
+        $project: {
+          name: '$product.name',
+          category: '$product.category',
+          totalRevenue: 1,
+          totalQuantity: 1
+        }
+      },
+      {
+        $sort: { totalRevenue: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+    
+    res.json({
+      dailyOrders,
+      statusDistribution,
+      topProducts
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};
+
+export const getUserAnalytics = async (req, res) => {
+  try {
+    const { period = '30' } = req.query;
+    const days = parseInt(period);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    
+    // User registration trends
+    const dailyRegistrations = await User.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+            day: { $dayOfMonth: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
+      }
+    ]);
+    
+    // User status distribution
+    const statusDistribution = await User.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    // Top users by order count
+    const topUsers = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$user',
+          orderCount: { $sum: 1 },
+          totalSpent: { $sum: '$total' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          username: '$user.username',
+          email: '$user.email',
+          orderCount: 1,
+          totalSpent: 1
+        }
+      },
+      {
+        $sort: { orderCount: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+    
+    res.json({
+      dailyRegistrations,
+      statusDistribution,
+      topUsers
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};

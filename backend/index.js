@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import multer from "multer";
 import userAuthRoutes from "./routers/userAuthRoutes.js";
+import reviewRoutes from './routers/reviewRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +29,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/admin", adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/user", userAuthRoutes);
+app.use('/api', reviewRoutes);
 
 // Error handling middleware for multer uploads
 app.use((error, req, res, next) => {

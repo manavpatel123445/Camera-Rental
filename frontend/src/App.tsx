@@ -27,6 +27,7 @@ import Checkout from './APP/Pages/Checkout';
 import UsersList from './APP/admin/users/UsersList';
 import UserOrders from './APP/Pages/UserOrders';
 import OrdersList from './APP/admin/orders/OrdersList';
+import Support from './APP/Pages/Support';
 
 
 function App() {
@@ -94,6 +95,8 @@ function App() {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/profile" element={<UserProfile />} />
       <Route path="/orders" element={<UserOrders />} />
+      <Route path="/support" element={<Support />} />
+     
       <Route path="/admin/orders" element={
         <ProtectedRoute>
           <OrdersList />

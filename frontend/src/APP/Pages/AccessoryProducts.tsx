@@ -32,6 +32,8 @@ const AccessoryProducts: React.FC = () => {
   const cartTotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
   const navigate = useNavigate();
   const [viewMode] = useState<'grid' | 'list'>('grid');
+  // Add sort option state
+  const [sortOption, setSortOption] = useState('priceLowHigh');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -75,6 +77,18 @@ const AccessoryProducts: React.FC = () => {
   const accessories = products.filter(p => (p.category?.toLowerCase() || '').includes('accessor'));
   const lighting = products.filter(p => (p.category?.toLowerCase() || '').includes('light'));
 
+  // Sort accessories based on sortOption
+  let sortedAccessories = [...accessories];
+  if (sortOption === 'priceLowHigh') {
+    sortedAccessories.sort((a, b) => (a.pricePerDay || 0) - (b.pricePerDay || 0));
+  } else if (sortOption === 'priceHighLow') {
+    sortedAccessories.sort((a, b) => (b.pricePerDay || 0) - (a.pricePerDay || 0));
+  } else if (sortOption === 'nameAZ') {
+    sortedAccessories.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortOption === 'nameZA') {
+    sortedAccessories.sort((a, b) => b.name.localeCompare(a.name));
+  }
+
   return (
     <div className="min-h-screen bg-[#181622] text-white">
       <CommonNavbar />
@@ -102,6 +116,8 @@ const AccessoryProducts: React.FC = () => {
               </Button>
               <select
                 className="bg-slate-800 border border-slate-600 text-white rounded px-3 py-1"
+                value={sortOption}
+                onChange={e => setSortOption(e.target.value)}
               >
                 <option value="priceLowHigh">Price: Low to High</option>
                 <option value="priceHighLow">Price: High to Low</option>
@@ -126,7 +142,7 @@ const AccessoryProducts: React.FC = () => {
           ) : (
             viewMode === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {accessories.slice(0, 8).map((product: any) => (
+                {sortedAccessories.slice(0, 8).map((product: any) => (
                   <div key={product._id} className="bg-[#1E293B] rounded-2xl shadow p-6 flex flex-col items-start">
                     <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-white flex items-center justify-center cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
                       <img
@@ -154,7 +170,7 @@ const AccessoryProducts: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col gap-6">
-                {accessories.map((product: any) => (
+                {sortedAccessories.map((product: any) => (
                   <div key={product._id} className="bg-[#1E293B] rounded-xl shadow-lg p-6 flex flex-col md:flex-row items-center gap-6">
                     <div className="w-32 h-32 flex-shrink-0 bg-white rounded-lg flex items-center justify-center overflow-hidden mb-4 md:mb-0">
                       <img

@@ -150,6 +150,9 @@ export const updateUserProfile = async (req, res) => {
 
 export const createOrder = async (req, res) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "User not authenticated." });
+    }
     const { items, total, startDate, endDate } = req.body;
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Order items required." });

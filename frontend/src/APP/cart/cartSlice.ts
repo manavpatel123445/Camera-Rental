@@ -70,6 +70,9 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
       saveCartToStorage(state.items);
+      // Also clear the dates from localStorage when cart is cleared
+      localStorage.removeItem('pickupDate');
+      localStorage.removeItem('dropoffDate');
     },
   },
 });

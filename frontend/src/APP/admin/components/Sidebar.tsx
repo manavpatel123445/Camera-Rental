@@ -3,7 +3,7 @@ import { FaTachometerAlt, FaBoxOpen, FaClipboardList, FaUsers, FaUserCircle } fr
 
 const Sidebar = () => {
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-[var(--secondary-bg)] shadow-xl rounded-r-3xl flex flex-col py-8 px-4 z-40 border-r border-[var(--border-color)] transition-colors duration-300 text-[var(--text-primary)]">
+    <aside className="fixed left-0 top-0 h-full md:w-64 w-full bg-[var(--secondary-bg)] shadow-xl rounded-r-3xl  flex-col py-8 md:px-4 px-2 z-40 border-r border-[var(--border-color)] transition-colors duration-300 text-[var(--text-primary)] md:block hidden">
       <div className="mb-8 flex items-center gap-2">
         <span className="font-bold text-2xl text-[var(--text-primary)]">Admin Panel</span>
       </div>

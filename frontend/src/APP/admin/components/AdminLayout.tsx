@@ -49,7 +49,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </button>
       )}
       {/* Main content, below navbar, with sidebar margin */}
-      <div className={`flex-1 transition-all duration-300 pt-16 ${sidebarOpen ? 'ml-64' : 'ml-4'} p-4 md:p-8`}>{children}</div>
+      <div className={`flex-1 transition-all duration-300 pt-16 ${sidebarOpen ? 'ml-64' : 'ml-0'} p-2 md:p-8`}>{children}</div>
     </div>
   );
 };

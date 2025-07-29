@@ -1,9 +1,11 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from '../store';
+import type { CartItem } from '../cart/cartSlice';
 import { clearCart, updateQuantity, updateRentalDays } from "../cart/cartSlice";
+import { fetchUserProfile } from "../userAuth/userAuthSlice";
 import { 
   ShoppingCart, 
   CreditCard, 
@@ -15,7 +17,8 @@ import {
   ArrowLeft,
   AlertCircle,
   Edit,
-  ChevronRight
+  ChevronRight,
+  UserCheck
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommonNavbar from "../../components/ui/CommonNavbar";
@@ -39,23 +42,27 @@ interface CheckoutForm {
   insurance: boolean;
   expeditedShipping: boolean;
   specialInstructions: string;
+  cart: any;
+  items: any;
 }
 
 export default function Checkout() {
-  const cart = useSelector((state: RootState) => state.cart.items);
+  const cart = useSelector((state: RootState) => state.cart.items) as CartItem[];
+  const user = useSelector((state: RootState) => state.userAuth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   const [formData, setFormData] = useState<CheckoutForm>({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
-    startDate: "",
-    endDate: "",
+    startDate: localStorage.getItem('pickupDate') || "",
+    endDate: localStorage.getItem('dropoffDate') || "",
     address: "",
     city: "",
     state: "gujarat",
@@ -67,8 +74,57 @@ export default function Checkout() {
     cardholderName: "",
     insurance: false,
     expeditedShipping: false,
-    specialInstructions: ""
+    specialInstructions: "",
+    cart: [],
+    items: [],
   });
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    if (user?.token) {
+      dispatch(fetchUserProfile() as any);
+    }
+  }, [dispatch, user?.token]);
+
+  // Auto-fill form with user profile data when available
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: user.username?.split(' ')[0] || prev.firstName,
+        lastName: user.username?.split(' ').slice(1).join(' ') || prev.lastName,
+        email: user.email || prev.email,
+        phone: user.contact || prev.phone,
+      }));
+    }
+  }, [user]);
+
+  // Function to use profile address
+  const useProfileAddress = () => {
+    if (user?.address) {
+      setFormData(prev => ({
+        ...prev,
+        address: user.address?.street || "",
+        city: user.address?.city || "",
+        state: user.address?.state || "",
+        zipCode: user.address?.zip || "",
+        country: user.address?.country || "",
+      }));
+    }
+  };
+
+  // Function to use profile information
+  const useProfileInfo = () => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: user.username?.split(' ')[0] || "",
+        lastName: user.username?.split(' ').slice(1).join(' ') || "",
+        email: user.email || "",
+        phone: user.contact || "",
+      }));
+    }
+  };
 
   // Redirect to cart if empty
   if (cart.length === 0 && !orderComplete) {
@@ -143,15 +199,19 @@ export default function Checkout() {
     setIsProcessing(false);
     setOrderComplete(true);
     dispatch(clearCart());
+    
+    // Clear the dates from localStorage after successful order
+    localStorage.removeItem('pickupDate');
+    localStorage.removeItem('dropoffDate');
   };
 
   // Calculate totals
-  const subtotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
+  const subtotal = cart.reduce((sum: number, item: CartItem) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
   const insurance = formData.insurance ? subtotal * 0.1 : 0;
   const expeditedShipping = formData.expeditedShipping ? 25 : 15;
   const tax = (subtotal + insurance + expeditedShipping) * 0.08;
   const total = subtotal + insurance + expeditedShipping + tax;
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
 
   if (orderComplete) {
     return (
@@ -284,7 +344,7 @@ export default function Checkout() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {cart.map((item: any) => (
+                {cart.map((item: CartItem) => (
                   <div key={item._id} className="bg-slate-700 rounded-lg p-4">
                     <div className="flex items-start space-x-4">
                       <img
@@ -314,7 +374,7 @@ export default function Checkout() {
                           <div>
                             <span className="text-gray-400">Subtotal:</span>
                             <span className="text-purple-400 font-semibold ml-2">
-                              ${(item.pricePerDay * item.quantity * item.rentalDays).toFixed(2)}
+                              ${(item.pricePerDay * item.quantity * (item.rentalDays || 1)).toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -425,9 +485,22 @@ export default function Checkout() {
             {currentStep === 1 && (
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <User className="h-6 w-6 mr-2 text-purple-400" />
-                    Customer Information
+                  <CardTitle className="text-white flex items-center justify-between">
+                    <span className="flex items-center">
+                      <User className="h-6 w-6 mr-2 text-purple-400" />
+                      Customer Information
+                    </span>
+                    {user && (
+                      <Button
+                        onClick={useProfileInfo}
+                        variant="outline"
+                        size="sm"
+                        className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                      >
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        Use Profile Info
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -503,9 +576,22 @@ export default function Checkout() {
             {currentStep === 2 && (
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <MapPin className="h-6 w-6 mr-2 text-purple-400" />
-                    Delivery Address
+                  <CardTitle className="text-white flex items-center justify-between">
+                    <span className="flex items-center">
+                      <MapPin className="h-6 w-6 mr-2 text-purple-400" />
+                      Delivery Address
+                    </span>
+                    {user?.address && (
+                      <Button
+                        onClick={useProfileAddress}
+                        variant="outline"
+                        size="sm"
+                        className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                      >
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        Use Profile Address
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -559,6 +645,19 @@ export default function Checkout() {
                       name="zipCode"
                       required
                       value={formData.zipCode}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Country *
+                    </label>
+                    <input
+                      type="text"
+                      name="country"
+                      required
+                      value={formData.country}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />

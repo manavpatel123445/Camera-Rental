@@ -47,7 +47,7 @@ const authSlice = createSlice({
       state.user = null;
       // Clear localStorage
       localStorage.removeItem('adminProfile');
-      localStorage.removeItem('token');
+      localStorage.removeItem('adminToken');
     },
   },
 });
@@ -57,7 +57,7 @@ export default authSlice.reducer;
 
 // Thunk to fetch admin profile
 export const fetchAdminProfile = () => async (dispatch: any) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('adminToken');
   if (!token) return;
   try {
     const res = await fetch('http://localhost:3000/api/admin/profile', {
@@ -69,7 +69,7 @@ export const fetchAdminProfile = () => async (dispatch: any) => {
       dispatch(setAdminUser(data));
     } else if (res.status === 401) {
       dispatch(logout());
-      localStorage.removeItem('token');
+      localStorage.removeItem('adminToken');
     }
   } catch (err) {
     console.error('Error fetching profile:', err);
@@ -94,25 +94,23 @@ export const loginAndFetchProfile = (email: string, password: string) => async (
     
     // Save token
     if (data.token) {
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('adminToken', data.token);
     }
     
     // Fetch complete profile data
-    const profileRes = await fetch('http://localhost:3000/api/admin/profile', {
+    const profileResponse = await fetch('http://localhost:3000/api/admin/profile', {
       headers: { Authorization: `Bearer ${data.token}` },
       credentials: 'include',
     });
     
-    if (profileRes.ok) {
-      const profileData = await profileRes.json();
+    if (profileResponse.ok) {
+      const profileData = await profileResponse.json();
       dispatch(setAdminUser(profileData));
     } else {
-      // If profile fetch fails, use basic login data
-      dispatch(setAdminUser(data.admin));
+      throw new Error("Failed to fetch profile data");
     }
-    
-    return { success: true };
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    console.error('Login error:', error);
+    throw new Error(error.message || "Login failed");
   }
 };

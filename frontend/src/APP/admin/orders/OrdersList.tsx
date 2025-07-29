@@ -34,6 +34,7 @@ const OrdersList: React.FC = () => {
         const token = localStorage.getItem('token');
         const res = await fetch('http://localhost:3000/api/admin/orders', {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          credentials: 'include',
         });
         const data = await res.json();
         if (res.ok) {
@@ -80,7 +81,7 @@ const OrdersList: React.FC = () => {
                 <tr key={order._id}>
                   <td className="px-6 py-4 whitespace-nowrap font-mono text-xs text-slate-700">{order._id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-semibold text-slate-800">{order.user?.username || 'N/A'}</div>
+                    <div className="font-semibold text-slate-800">{order.user?.username || order.user?._id || 'N/A'}</div>
                     <div className="text-xs text-slate-500">{order.user?.email || ''}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -98,6 +99,7 @@ const OrdersList: React.FC = () => {
                             Authorization: `Bearer ${token}`,
                           },
                           body: JSON.stringify({ status: newStatus }),
+                          credentials: 'include',
                         });
                         if (res.ok) {
                           setOrders(orders => orders.map(o => o._id === order._id ? { ...o, status: newStatus } : o));
@@ -144,6 +146,7 @@ const OrdersList: React.FC = () => {
                           const res = await fetch(`http://localhost:3000/api/admin/orders/${order._id}`, {
                             method: 'DELETE',
                             headers: { Authorization: `Bearer ${token}` },
+                            credentials: 'include',
                           });
                           if (res.ok) {
                             setOrders(orders => orders.filter(o => o._id !== order._id));

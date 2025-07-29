@@ -54,9 +54,15 @@ export const fetchUserProfile = createAsyncThunk(
     try {
       const state = getState() as { userAuth: UserAuthState };
       const token = state.userAuth.user?.token;
-      const res = await fetch('/api/user/profile', {
+      const res = await fetch('http://localhost:3000/api/user/profile', {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return rejectWithValue('Unauthorized');
+      }
       if (!res.ok) throw new Error('Failed to fetch profile');
       return await res.json();
     } catch (err: any) {
@@ -71,7 +77,7 @@ export const updateUserProfile = createAsyncThunk(
     try {
       const state = getState() as { userAuth: UserAuthState };
       const token = state.userAuth.user?.token;
-      const res = await fetch('/api/user/profile', {
+      const res = await fetch('http://localhost:3000/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

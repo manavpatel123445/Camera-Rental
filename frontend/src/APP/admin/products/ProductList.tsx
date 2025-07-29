@@ -4,6 +4,7 @@ import AdminLayout from '../components/AdminLayout';
 import ProductModal from './ProductModal';
 import UpdateProductModal from './UpdateProductModal';
 import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
+import ReactModal from 'react-modal';
 
 interface Product {
   _id: string;
@@ -24,6 +25,8 @@ const ProductList = () => {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [search, setSearch] = useState('');
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewProduct, setViewProduct] = useState<Product | null>(null);
 
   const fetchProducts = async () => {
     try {
@@ -50,8 +53,9 @@ const ProductList = () => {
     fetchProducts();
   }, []);
 
-  const handleView = (product: any) => {
-    console.log('View product:', product);
+  const handleView = (product: Product) => {
+    setViewProduct(product);
+    setViewModalOpen(true);
   };
 
   const handleUpdate = (product: any) => {
@@ -61,14 +65,53 @@ const ProductList = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      console.log('Delete product:', id);
-      // TODO: Call backend to delete and refresh list
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`http://localhost:3000/api/products/${id}`, {
+          method: 'DELETE',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        const data = await res.json();
+        if (res.ok) {
+          toast.success('Product deleted successfully!');
+          fetchProducts();
+        } else {
+          toast.error(data.message || 'Failed to delete product.');
+        }
+      } catch (err) {
+        toast.error('Network error occurred.');
+      }
     }
   };
 
   const handleAddProduct = (product: any) => {
     // Call your API or update state here
     console.log('New product:', product);
+  };
+
+  // Add handler for toggling product status
+  const handleToggleStatus = async (product: Product) => {
+    const newStatus = product.status === "Active" ? "Inactive" : "Active";
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:3000/api/products/${product._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include',
+      });
+      if (res.ok) {
+        toast.success(`Product ${newStatus === "Active" ? "activated" : "deactivated"}!`);
+        fetchProducts();
+      } else {
+        toast.error('Failed to update status.');
+      }
+    } catch {
+      toast.error('Network error.');
+    }
   };
 
   // Filter products based on search
@@ -135,18 +178,30 @@ const ProductList = () => {
                   <td className="py-2 px-4 w-64 max-w-xs truncate">{product.description}</td>
                   <td className="py-2 px-4 w-20 font-semibold">{product.quantity}</td>
                   <td className="py-2 px-4 w-24">
-                    <span
+                    <button
                       className={
-                        "px-3 py-1 rounded-full text-xs font-bold " +
+                        "px-3 py-1 rounded-full text-xs font-bold transition " +
                         (product.status === "Active"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-100 text-green-700 hover:bg-green-200"
                           : product.status === "Inactive"
-                          ? "bg-gray-200 text-gray-600"
+                          ? "bg-gray-200 text-gray-600 hover:bg-gray-300"
                           : "bg-yellow-100 text-yellow-700")
                       }
+                      onClick={() => handleToggleStatus(product)}
+                      title={
+                        product.status === "Active"
+                          ? "Deactivate"
+                          : product.status === "Inactive"
+                          ? "Activate"
+                          : "Set status"
+                      }
                     >
-                      {product.status}
-                    </span>
+                      {product.status === "Active"
+                        ? "Active"
+                        : product.status === "Inactive"
+                        ? "Inactive"
+                        : "Unknown"}
+                    </button>
                   </td>
                   <td className="py-2 px-4 w-32 flex gap-2">
                     <button
@@ -188,6 +243,37 @@ const ProductList = () => {
         product={selectedProduct}
         onUpdated={fetchProducts}
       />
+      {/* View Product Modal */}
+      <ReactModal
+        isOpen={viewModalOpen}
+        onRequestClose={() => setViewModalOpen(false)}
+        contentLabel="View Product"
+        ariaHideApp={false}
+        className="max-w-md mx-auto mt-24 bg-white rounded-lg shadow-lg p-6 outline-none"
+        overlayClassName="fixed inset-0 bg-white/40 flex items-center justify-center z-50"
+      >
+        {viewProduct && (
+          <div className="space-y-4 text-slate-800">
+            <div className="flex flex-col items-center">
+              {viewProduct.image && (
+                <img src={viewProduct.image} alt={viewProduct.name || ''} className="w-32 h-32 object-cover rounded mb-2" />
+              )}
+              <h2 className="text-xl font-bold mb-1">{viewProduct?.name}</h2>
+              <span className="text-sm text-gray-500 mb-2">{viewProduct?.category}</span>
+            </div>
+            <div><span className="font-semibold">Price/Day:</span> ${viewProduct?.pricePerDay}</div>
+            <div><span className="font-semibold">Description:</span> {viewProduct?.description || 'No description'}</div>
+            <div><span className="font-semibold">Quantity:</span> {viewProduct?.quantity}</div>
+            <div><span className="font-semibold">Status:</span> {viewProduct?.status || 'Unknown'}</div>
+            <button
+              className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+              onClick={() => setViewModalOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        )}
+      </ReactModal>
     </AdminLayout>
   );
 };
