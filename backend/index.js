@@ -17,9 +17,14 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ 
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173", 
-  credentials: true 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://your-frontend.vercel.app"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
 }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));

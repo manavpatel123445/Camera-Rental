@@ -1,6 +1,12 @@
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://your-frontend.vercel.app' // Replace with your actual Vercel URL
+];
 
 const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
