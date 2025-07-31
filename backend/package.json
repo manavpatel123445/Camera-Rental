@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node  index.js",
-    "build": "babel src -d lib",
-    "test": "jest"
-
+    "test": "echo \"Error: no test specified\" && exit 1"
+    
   },
   "keywords": [],
   "author": "",
