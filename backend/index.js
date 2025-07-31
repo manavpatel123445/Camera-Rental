@@ -22,13 +22,15 @@ const allowedOrigins = [
   "https://https://camera-rental-one.vercel.app/"
 ];
 
+const cors = require('cors');
+
 app.use(cors({
-  origin: allowedOrigins,
+  origin: [
+    'https://camera-rental-one.vercel.app', 
+    'http://localhost:5173' 
+  ],
   credentials: true
 }));
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
-app.use(cookieParser());
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
