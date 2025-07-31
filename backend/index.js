@@ -22,7 +22,7 @@ const allowedOrigins = [
   "https://https://camera-rental-one.vercel.app/"
 ];
 
-const cors = require('cors');
+
 
 app.use(cors({
   origin: [
