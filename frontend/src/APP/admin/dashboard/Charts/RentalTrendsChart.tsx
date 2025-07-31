@@ -87,7 +87,7 @@ const RentalTrendsChart: React.FC = () => {
       const token = localStorage.getItem('adminToken');
       console.log('Fetching analytics with token:', token ? 'Token exists' : 'No token');
       
-      const response = await fetch('http://localhost:3000/api/admin/analytics/dashboard', {
+      const response = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/analytics/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

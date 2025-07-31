@@ -28,7 +28,7 @@ const Dashboard = () => {
 
   const fetchProductStats = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/products/stats');
+        const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products/stats');
         const data = await res.json();
         setProductStats(data);
       } catch (err) {
@@ -43,7 +43,7 @@ const Dashboard = () => {
       const token = localStorage.getItem('adminToken');
       console.log('Dashboard: Fetching analytics with token:', token ? 'Token exists' : 'No token');
       
-      const response = await fetch('http://localhost:3000/api/admin/analytics/dashboard', {
+      const response = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/analytics/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

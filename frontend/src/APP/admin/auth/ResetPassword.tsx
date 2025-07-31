@@ -18,7 +18,7 @@ const ResetPassword = () => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:3000/api/admin/reset-password", {
+      const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),

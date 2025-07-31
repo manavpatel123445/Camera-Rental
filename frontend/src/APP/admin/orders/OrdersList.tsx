@@ -32,7 +32,7 @@ const OrdersList: React.FC = () => {
       setError('');
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:3000/api/admin/orders', {
+        const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/orders', {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           credentials: 'include',
         });
@@ -92,7 +92,7 @@ const OrdersList: React.FC = () => {
                       onChange={async (e) => {
                         const newStatus = e.target.value;
                         const token = localStorage.getItem('token');
-                        const res = await fetch(`http://localhost:3000/api/admin/orders/${order._id}/status`, {
+                        const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/orders/${order._id}/status`, {
                           method: 'PATCH',
                           headers: {
                             'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ const OrdersList: React.FC = () => {
                     <ul className="space-y-1">
                       {order.items.map(item => (
                         <li key={item.product} className="flex items-center gap-2 text-slate-700 text-xs">
-                          {item.image && <img src={item.image.startsWith('http') ? item.image : `http://localhost:3000/${item.image}`} alt={item.name} className="w-6 h-6 rounded object-cover" />}
+                          {item.image && <img src={item.image.startsWith('http') ? item.image : `https://camera-rental-ndr0.onrender.com/${item.image}`} alt={item.name} className="w-6 h-6 rounded object-cover" />}
                           <span className="font-bold">{item.name}</span>
                           <span className="ml-1">x{item.quantity}</span>
                           <span className="ml-1 text-slate-400">@ ${item.pricePerDay}/day</span>
@@ -143,7 +143,7 @@ const OrdersList: React.FC = () => {
                       onClick={async () => {
                         if (window.confirm('Are you sure you want to delete this order?')) {
                           const token = localStorage.getItem('token');
-                          const res = await fetch(`http://localhost:3000/api/admin/orders/${order._id}`, {
+                          const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/orders/${order._id}`, {
                             method: 'DELETE',
                             headers: { Authorization: `Bearer ${token}` },
                             credentials: 'include',

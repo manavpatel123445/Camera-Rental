@@ -53,7 +53,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
       }
 
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3000/api/products', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
         method: 'POST',
         body: formData,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,

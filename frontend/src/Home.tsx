@@ -20,7 +20,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/products');
+        const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products');
         const data = await res.json();
         if (res.ok) {
           setProducts(data);
@@ -94,7 +94,7 @@ const Home: React.FC = () => {
               <div key={product._id} className="bg-[#1E293B] rounded-2xl shadow p-6 flex flex-col items-start w-full">
                 <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-white flex items-center justify-center cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
                   <img
-                    src={product.image?.startsWith('http') ? product.image : `http://localhost:3000/${product.image}`}
+                    src={product.image?.startsWith('http') ? product.image : `https://camera-rental-ndr0.onrender.com/${product.image}`}
                     alt={product.name}
                     className="w-full h-full object-contain"
                   />

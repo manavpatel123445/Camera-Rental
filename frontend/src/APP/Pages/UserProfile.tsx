@@ -87,7 +87,7 @@ const UserProfile: React.FC = () => {
     formData.append('avatar', file);
     const token = user?.token || localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:3000/api/user/profile/avatar', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile/avatar', {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -98,7 +98,7 @@ const UserProfile: React.FC = () => {
         const data = await res.json();
         const avatarUrl = data.avatar.startsWith('http')
           ? data.avatar
-          : `http://localhost:3000/${data.avatar.replace(/\\/g, '/')}`;
+          : `https://camera-rental-ndr0.onrender.com/${data.avatar.replace(/\\/g, '/')}`;
         dispatch(setUser({ ...user, avatar: avatarUrl }));
         setAvatarPreview(avatarUrl);
         toast.success('Profile image updated!');
@@ -122,7 +122,7 @@ const UserProfile: React.FC = () => {
     // Do NOT send avatar here
     const token = user?.token || localStorage.getItem('token');
     if (!token) return;
-    const res = await fetch('http://localhost:3000/api/user/profile', {
+    const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ const UserProfile: React.FC = () => {
                       src={
                         avatarPreview.startsWith('http')
                           ? avatarPreview
-                          : `http://localhost:3000/${avatarPreview.replace(/\\/g, '/')}`
+                          : `https://camera-rental-ndr0.onrender.com/${avatarPreview.replace(/\\/g, '/')}`
                       }
                       alt="Avatar"
                       className="w-full h-full object-cover"

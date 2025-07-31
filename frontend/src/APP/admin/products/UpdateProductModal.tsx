@@ -33,7 +33,7 @@ const UpdateProductModal = ({ isOpen, onClose, product, onUpdated }: any) => {
       if (form.imageType === 'file' && form.image) formData.append('image', form.image);
       if (form.imageType === 'url' && form.imageUrl) formData.append('imageUrl', form.imageUrl);
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3000/api/products/${product._id}`, {
+      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${product._id}`, {
         method: 'PATCH',
         body: formData,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,

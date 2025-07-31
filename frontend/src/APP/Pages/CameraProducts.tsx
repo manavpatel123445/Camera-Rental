@@ -44,7 +44,7 @@ const CameraProducts: React.FC = () => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const res = await fetch('http://localhost:3000/api/products');
+        const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products');
         const data = await res.json();
         setProducts(data.filter((p: Product) => p.category?.toLowerCase().includes('camera')));
       } catch (err) {
@@ -180,7 +180,7 @@ const CameraProducts: React.FC = () => {
                   <div key={product._id} className="bg-[#1E293B] rounded-2xl shadow p-6 flex flex-col items-start">
                     <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-white flex items-center justify-center cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
                       <img
-                        src={product.image?.startsWith('http') ? product.image : `http://localhost:3000/${product.image}`}
+                        src={product.image?.startsWith('http') ? product.image : `https://camera-rental-ndr0.onrender.com/${product.image}`}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
@@ -208,7 +208,7 @@ const CameraProducts: React.FC = () => {
                   <div key={product._id} className="bg-[#1E293B] rounded-xl shadow-lg p-6 flex flex-col md:flex-row items-center gap-6">
                     <div className="w-32 h-32 flex-shrink-0 bg-white rounded-lg flex items-center justify-center overflow-hidden mb-4 md:mb-0">
                       <img
-                        src={product.image?.startsWith('http') ? product.image : `http://localhost:3000/${product.image}`}
+                        src={product.image?.startsWith('http') ? product.image : `https://camera-rental-ndr0.onrender.com/${product.image}`}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />

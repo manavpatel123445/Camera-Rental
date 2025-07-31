@@ -54,7 +54,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
       const token = localStorage.getItem('token');
       const authToken = adminToken || token;
       
-      const res = await fetch("http://localhost:3000/api/admin/profile/image", {
+      const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/profile/image", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -81,7 +81,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/admin/profile", {
+      const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -146,7 +146,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
               <div className="w-12 h-12 rounded-full bg-[var(--primary-bg)] flex items-center justify-center overflow-hidden">
                 {admin?.profileImage ? (
                   <img 
-                    src={admin.profileImage.startsWith('http') ? admin.profileImage : `http://localhost:3000/${admin.profileImage}`}
+                    src={admin.profileImage.startsWith('http') ? admin.profileImage : `https://camera-rental-ndr0.onrender.com/${admin.profileImage}`}
                     alt="Profile" 
                     className="w-12 h-12 rounded-full object-cover"
                     onError={(e) => {

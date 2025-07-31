@@ -17,7 +17,7 @@ const StatsWidget = () => {
           return;
         }
 
-        const res = await fetch('http://localhost:3000/api/products/stats', {
+        const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products/stats', {
           headers: {
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json'

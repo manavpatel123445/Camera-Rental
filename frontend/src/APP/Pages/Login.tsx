@@ -21,7 +21,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/user/login', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

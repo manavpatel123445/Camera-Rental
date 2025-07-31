@@ -122,7 +122,7 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
               <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gray-600 flex items-center justify-center ml-1 md:ml-2 cursor-pointer overflow-hidden">
                 {user.avatar ? (
                   <img
-                    src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000/${user.avatar}`}
+                    src={user.avatar.startsWith('http') ? user.avatar : `https://camera-rental-ndr0.onrender.com/${user.avatar}`}
                     alt="avatar"
                     className="w-full h-full object-cover"
                   />

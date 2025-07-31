@@ -15,7 +15,7 @@ const UserOrders: React.FC = () => {
     if (!user) return;
     setOrdersLoading(true);
     const token = user?.token || localStorage.getItem('token');
-    fetch('http://localhost:3000/api/user/orders', {
+    fetch('https://camera-rental-ndr0.onrender.com/api/user/orders', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -75,7 +75,7 @@ const UserOrders: React.FC = () => {
                     <ul className="space-y-1">
                       {order.items.map((item: any) => (
                         <li key={item.product} className="flex items-center gap-2 text-gray-200">
-                          {item.image && <img src={item.image.startsWith('http') ? item.image : `http://localhost:3000/${item.image}`} alt={item.name} className="w-8 h-8 rounded object-cover" />}
+                          {item.image && <img src={item.image.startsWith('http') ? item.image : `https://camera-rental-ndr0.onrender.com/${item.image}`} alt={item.name} className="w-8 h-8 rounded object-cover" />}
                           <span className="font-bold">{item.name}</span>
                           <span className="ml-2">x{item.quantity}</span>
                           <span className="ml-2 text-gray-400">@ ${item.pricePerDay}/day</span>
@@ -89,13 +89,13 @@ const UserOrders: React.FC = () => {
                       className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg"
                       onClick={async () => {
                         const token = user?.token || localStorage.getItem('token');
-                        await fetch(`http://localhost:3000/api/user/orders/${order._id}/cancel`, {
+                        await fetch(`https://camera-rental-ndr0.onrender.com/api/user/orders/${order._id}/cancel`, {
                           method: 'PATCH',
                           headers: { Authorization: `Bearer ${token}` },
                         });
                         // Re-fetch orders from backend
                         setOrdersLoading(true);
-                        fetch('http://localhost:3000/api/user/orders', {
+                        fetch('https://camera-rental-ndr0.onrender.com/api/user/orders', {
                           headers: { Authorization: `Bearer ${token}` },
                         })
                           .then(res => res.json())

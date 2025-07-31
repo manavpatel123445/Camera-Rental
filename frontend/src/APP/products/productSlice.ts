@@ -28,7 +28,7 @@ const initialState: ProductState = {
 // Async thunk to fetch all products
 export const fetchProducts = createAsyncThunk('products/fetchAll', async () => {
   const token = localStorage.getItem('token');
-  const res = await fetch('http://localhost:3000/api/products', {
+  const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
   const data = await res.json();

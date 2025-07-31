@@ -93,7 +93,7 @@ const AddProduct = () => {
       if (form.splineUrl) formData.append('splineUrl', form.splineUrl);
 
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3000/api/products', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
         method: 'POST',
         body: formData,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,

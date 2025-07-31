@@ -62,7 +62,7 @@ const UserAnalyticsChart: React.FC = () => {
       
       console.log('UserAnalyticsChart: Fetching with token:', authToken ? 'Token exists' : 'No token');
       
-      const response = await fetch(`http://localhost:3000/api/admin/analytics/users?period=${period}`, {
+      const response = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/analytics/users?period=${period}`, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'

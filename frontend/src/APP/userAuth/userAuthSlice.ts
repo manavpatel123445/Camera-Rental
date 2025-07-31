@@ -54,7 +54,7 @@ export const fetchUserProfile = createAsyncThunk(
     try {
       const state = getState() as { userAuth: UserAuthState };
       const token = state.userAuth.user?.token;
-      const res = await fetch('http://localhost:3000/api/user/profile', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
@@ -77,7 +77,7 @@ export const updateUserProfile = createAsyncThunk(
     try {
       const state = getState() as { userAuth: UserAuthState };
       const token = state.userAuth.user?.token;
-      const res = await fetch('http://localhost:3000/api/user/profile', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

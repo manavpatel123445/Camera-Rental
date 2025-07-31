@@ -59,7 +59,7 @@ const CartAnalyticsChart: React.FC = () => {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:3000/api/admin/analytics/dashboard', {
+      const response = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/analytics/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

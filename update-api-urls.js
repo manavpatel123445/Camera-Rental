@@ -28,7 +28,7 @@ function updateApiUrls(filePath, newBaseUrl) {
     let updated = false;
     
     // Replace localhost:3000 with the new base URL
-    const oldUrl = 'http://localhost:3000';
+    const oldUrl = 'https://camera-rental-ndr0.onrender.com';
     if (content.includes(oldUrl)) {
       content = content.replace(new RegExp(oldUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newBaseUrl);
       updated = true;

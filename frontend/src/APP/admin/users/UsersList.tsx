@@ -35,7 +35,7 @@ export default function UsersList() {
           return;
         }
 
-        const res = await fetch('http://localhost:3000/api/admin/users', {
+        const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/users', {
           headers: { 
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json'
@@ -94,7 +94,7 @@ export default function UsersList() {
         return;
       }
 
-      const res = await fetch(`http://localhost:3000/api/admin/users/${userId}/status`, {
+      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -56,7 +56,7 @@ const OrdersChart: React.FC = () => {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:3000/api/admin/analytics/orders?period=${period}`, {
+      const response = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/analytics/orders?period=${period}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

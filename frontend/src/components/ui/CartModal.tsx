@@ -80,7 +80,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onClose, cart, onRemove, on
                   <div className="w-24 h-24 flex-shrink-0 bg-white rounded-lg flex items-center justify-center overflow-hidden mb-4 md:mb-0">
                     {item.image ? (
                       <img 
-                        src={item.image.startsWith('http') ? item.image : `http://localhost:3000/${item.image}`} 
+                        src={item.image.startsWith('http') ? item.image : `https://camera-rental-ndr0.onrender.com/${item.image}`} 
                         alt={item.name} 
                         className="w-full h-full object-cover" 
                       />

@@ -60,7 +60,7 @@ const AdminProfile = () => {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/admin/profile", {
+      const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -147,7 +147,7 @@ const AdminProfile = () => {
       formData.append('profileImage', file);
       
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/admin/profile/image", {
+      const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/profile/image", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -200,7 +200,7 @@ const AdminProfile = () => {
                     <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4 overflow-hidden">
                       {admin?.profileImage ? (
                         <img 
-                          src={admin.profileImage.startsWith('http') ? admin.profileImage : `http://localhost:3000/${admin.profileImage}`}
+                          src={admin.profileImage.startsWith('http') ? admin.profileImage : `https://camera-rental-ndr0.onrender.com/${admin.profileImage}`}
                           alt="Profile" 
                           className="w-24 h-24 rounded-full object-cover"
                           onError={(e) => {

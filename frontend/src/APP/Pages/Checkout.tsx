@@ -178,7 +178,7 @@ export default function Checkout() {
     // Create order in backend
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:3000/api/user/orders', {
+      await fetch('https://camera-rental-ndr0.onrender.com/api/user/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

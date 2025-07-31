@@ -30,7 +30,7 @@
 ## Frontend Deployment (Vercel)
 
 ### Step 1: Update API URLs
-Replace all `http://localhost:3000` with your Render backend URL in:
+Replace all `https://camera-rental-ndr0.onrender.com` with your Render backend URL in:
 - `frontend/src/Home.tsx`
 - `frontend/src/APP/Pages/ProductDetail.tsx`
 - Any other files making API calls

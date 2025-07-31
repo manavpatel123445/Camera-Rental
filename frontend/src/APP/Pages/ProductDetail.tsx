@@ -21,12 +21,12 @@ const ProductDetail: React.FC = () => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3000/api/products/${id}`);
+        const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${id}`);
         const data = await res.json();
         setProduct(data);
         
         // Fetch related products
-        const relatedRes = await fetch(`http://localhost:3000/api/products?category=${data.category}&limit=4`);
+        const relatedRes = await fetch(`https://camera-rental-ndr0.onrender.com/api/products?category=${data.category}&limit=4`);
         const relatedData = await relatedRes.json();
         setRelatedProducts(relatedData.filter((p: any) => p._id !== id));
       } catch (err) {
@@ -192,7 +192,7 @@ const ProductDetail: React.FC = () => {
           <div className="space-y-6">
             <div className=" rounded-2xl p-2 flex items-center justify-center">
               <img
-                src={product.image?.startsWith('http') ? product.image : `http://localhost:3000/${product.image}`}
+                src={product.image?.startsWith('http') ? product.image : `https://camera-rental-ndr0.onrender.com/${product.image}`}
                 alt={product.name}
                 className="w-full max-w-md h-96 object-contain"
               />
@@ -377,7 +377,7 @@ const ProductDetail: React.FC = () => {
                   {relatedProducts.slice(0, 4).map((relatedProduct) => (
                     <div key={relatedProduct._id} className="bg-[#1E293B] rounded-lg p-4 cursor-pointer hover:border-purple-500 border-2 border-transparent transition-colors">
                       <img
-                        src={relatedProduct.image?.startsWith('http') ? relatedProduct.image : `http://localhost:3000/${relatedProduct.image}`}
+                        src={relatedProduct.image?.startsWith('http') ? relatedProduct.image : `https://camera-rental-ndr0.onrender.com/${relatedProduct.image}`}
                         alt={relatedProduct.name}
                         className="w-full h-32 object-cover rounded-lg mb-3"
                       />

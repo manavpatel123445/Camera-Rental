@@ -27,12 +27,12 @@ const ChangePassword = () => {
       return;
     }
     try {
-      let endpoint = "http://localhost:3000/api/admin/change-password";
+      let endpoint = "https://camera-rental-ndr0.onrender.com/api/admin/change-password";
       let body;
       let headers: Record<string, string> = { "Content-Type": "application/json" };
       if (token) {
         // If token is present, use reset-password endpoint
-        endpoint = "http://localhost:3000/api/admin/reset-password";
+        endpoint = "https://camera-rental-ndr0.onrender.com/api/admin/reset-password";
         body = JSON.stringify({ token, password: newPassword });
       } else {
         // Authenticated change password

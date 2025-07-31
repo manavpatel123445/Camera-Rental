@@ -37,7 +37,7 @@ const ProductDetail = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:3000/api/products/${id}`, {
+        const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${id}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
         const data = await res.json();
@@ -119,7 +119,7 @@ const ProductDetail = () => {
       if (imageType === 'file' && form.image) formData.append('image', form.image);
       if (imageType === 'url' && form.imageUrl) formData.append('imageUrl', form.imageUrl);
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3000/api/products/${id}`, {
+      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${id}`, {
         method: 'PATCH',
         body: formData,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -147,7 +147,7 @@ const ProductDetail = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3000/api/products/${id}`, {
+      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${id}`, {
         method: 'DELETE',
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });

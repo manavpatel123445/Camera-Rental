@@ -22,7 +22,7 @@ const AdminRegister = () => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:3000/api/admin/register", {
+      const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),

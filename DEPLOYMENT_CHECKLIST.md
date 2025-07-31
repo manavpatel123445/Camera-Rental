@@ -89,12 +89,12 @@
 ```
 MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/database
 JWT_SECRET=your_secure_jwt_secret
-CORS_ORIGIN=https://your-frontend.vercel.app
+CORS_ORIGIN=https://camera-rental-one.vercel.app/
 ```
 
 ### Frontend (Vercel)
 ```
-VITE_API_URL=https://your-backend.onrender.com
+VITE_API_URL= https://camera-rental-ndr0.onrender.com
 ```
 
 ---

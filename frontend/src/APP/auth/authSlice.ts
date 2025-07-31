@@ -60,7 +60,7 @@ export const fetchAdminProfile = () => async (dispatch: any) => {
   const token = localStorage.getItem('adminToken');
   if (!token) return;
   try {
-    const res = await fetch('http://localhost:3000/api/admin/profile', {
+    const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/profile', {
       headers: { Authorization: `Bearer ${token}` },
       credentials: 'include', // Include cookies in the request
     });
@@ -80,7 +80,7 @@ export const fetchAdminProfile = () => async (dispatch: any) => {
 // Thunk to login and fetch complete profile
 export const loginAndFetchProfile = (email: string, password: string) => async (dispatch: any) => {
   try {
-    const response = await fetch("http://localhost:3000/api/admin/login", {
+    const response = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -98,7 +98,7 @@ export const loginAndFetchProfile = (email: string, password: string) => async (
     }
     
     // Fetch complete profile data
-    const profileResponse = await fetch('http://localhost:3000/api/admin/profile', {
+    const profileResponse = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/profile', {
       headers: { Authorization: `Bearer ${data.token}` },
       credentials: 'include',
     });

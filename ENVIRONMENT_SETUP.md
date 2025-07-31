@@ -43,7 +43,7 @@ VITE_API_URL=https://your-backend.onrender.com
 Create a `.env` file in your frontend directory:
 ```bash
 # frontend/.env
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=https://camera-rental-ndr0.onrender.com
 ```
 
 ### Production Deployment
