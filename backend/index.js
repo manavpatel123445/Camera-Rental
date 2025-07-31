@@ -26,7 +26,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: [
-    'https://camera-rental-one.vercel.app', 
+    'https://camera-rental-one.vercel.app',
+    'https://camera-rental-git-main-manav-patels-projects-dc745a7f.vercel.app',
     'http://localhost:5173' 
   ],
   credentials: true
