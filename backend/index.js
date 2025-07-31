@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://your-frontend.vercel.app"
+  "https://https://camera-rental-one.vercel.app/"
 ];
 
 app.use(cors({
