@@ -70,9 +70,8 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
       saveCartToStorage(state.items);
-      // Also clear the dates from localStorage when cart is cleared
-      localStorage.removeItem('pickupDate');
-      localStorage.removeItem('dropoffDate');
+      // Don't clear dates here - they should persist for future rentals
+      // Dates will only be cleared after successful order completion
     },
   },
 });

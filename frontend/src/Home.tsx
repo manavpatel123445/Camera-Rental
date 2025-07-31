@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import CartModal from './components/ui/CartModal';
 import CommonNavbar from './components/ui/CommonNavbar';
 import { addToCart, removeFromCart, updateQuantity } from './APP/cart/cartSlice';
+import Footer from './components/ui/Footer';
 
 const Home: React.FC = () => {
   const dispatch = useDispatch();
@@ -60,11 +61,12 @@ const Home: React.FC = () => {
   const cartTotal = cart.reduce((sum, item) => sum + (item.pricePerDay || 0) * item.quantity * (item.rentalDays || 1), 0);
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-white flex flex-col">
+    <div className="min-h-screen bg-[#181622] text-white flex flex-col">
       <CommonNavbar />
 
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 md:px-8 py-8 md:py-16 bg-[#181622] gap-8 md:gap-12">
+      <section className="flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 md:px-8 py-8 md:py-16 
+       gap-8 md:gap-12">
         <div className="flex-1 flex justify-center mb-6 md:mb-0 w-full">
           <img
             src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop&crop=center"
@@ -116,6 +118,9 @@ const Home: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Footer */}
+      <Footer />
 
       <CartModal
         open={cartOpen}

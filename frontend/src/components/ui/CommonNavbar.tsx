@@ -8,6 +8,7 @@ import { FaShoppingCart, FaListAlt, FaBars, FaTimes } from 'react-icons/fa';
 import CartModal from './CartModal';
 import { removeFromCart, updateQuantity, clearCart } from '../../APP/cart/cartSlice';
 import { logout as userLogout } from '../../APP/userAuth/userAuthSlice';
+import logo from '../../assets/logo2.png';
 
 interface NavLink {
   label: string;
@@ -80,7 +81,7 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
     <nav className={`flex items-center justify-between px-4 md:px-8 py-4 bg-[#181622] ${className}`}>
       {/* Left: Logo */}
       <span className="text-2xl font-bold tracking-tight text-white cursor-pointer flex-shrink-0" onClick={() => window.location.href = '/'}>
-        LensRentals
+        <img src={logo} alt="LensRentals" className="w-30 h-15" />
       </span>
       {/* Center: Desktop Nav Links */}
       <div className="hidden md:flex gap-8 items-center flex-1 justify-center">

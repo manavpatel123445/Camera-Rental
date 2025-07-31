@@ -8,7 +8,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer, // admin
     userAuth: userAuthReducer, // user
-    products: productReducer, // products
+    products: productReducer, // productsx`
     cart: cartReducer, // cart
     // ...other reducers
   },

@@ -18,7 +18,9 @@ import {
   AlertCircle,
   Edit,
   ChevronRight,
-  UserCheck
+  UserCheck,
+  Menu,
+  X
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommonNavbar from "../../components/ui/CommonNavbar";
@@ -27,17 +29,17 @@ interface CheckoutForm {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone: number;
   startDate: string;
   endDate: string;
   address: string;
   city: string;
   state: string;
-  zipCode: string;
+  zipCode: number;
   country: string;
-  cardNumber: string;
+  cardNumber: number;
   expiryDate: string;
-  cvv: string;
+  cvv: number;
   cardholderName: string;
   insurance: boolean;
   expeditedShipping: boolean;
@@ -54,23 +56,24 @@ export default function Checkout() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [formData, setFormData] = useState<CheckoutForm>({
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phone: 0,
     startDate: localStorage.getItem('pickupDate') || "",
     endDate: localStorage.getItem('dropoffDate') || "",
     address: "",
     city: "",
     state: "gujarat",
-    zipCode: "",
+    zipCode: 0,
     country: "india",
-    cardNumber: "",
+    cardNumber: 0,
     expiryDate: "",
-    cvv: "",
+    cvv: 0,
     cardholderName: "",
     insurance: false,
     expeditedShipping: false,
@@ -94,7 +97,7 @@ export default function Checkout() {
         firstName: user.username?.split(' ')[0] || prev.firstName,
         lastName: user.username?.split(' ').slice(1).join(' ') || prev.lastName,
         email: user.email || prev.email,
-        phone: user.contact || prev.phone,
+        phone: user.contact ? parseInt(user.contact) || 0 : prev.phone,
       }));
     }
   }, [user]);
@@ -107,7 +110,7 @@ export default function Checkout() {
         address: user.address?.street || "",
         city: user.address?.city || "",
         state: user.address?.state || "",
-        zipCode: user.address?.zip || "",
+        zipCode: user.address?.zip ? parseInt(user.address.zip) || 0 : 0,
         country: user.address?.country || "",
       }));
     }
@@ -121,7 +124,7 @@ export default function Checkout() {
         firstName: user.username?.split(' ')[0] || "",
         lastName: user.username?.split(' ').slice(1).join(' ') || "",
         email: user.email || "",
-        phone: user.contact || "",
+        phone: user.contact ? parseInt(user.contact) || 0 : 0,
       }));
     }
   };
@@ -141,16 +144,16 @@ export default function Checkout() {
             </div>
           </div>
         </header>
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
           <div className="text-center">
-            <ShoppingCart className="h-16 w-16 text-gray-600 mx-auto mb-8" />
-            <h2 className="text-3xl font-bold text-white mb-4">Your Cart is Empty</h2>
-            <p className="text-xl text-gray-300 mb-8">
+            <ShoppingCart className="h-12 w-12 sm:h-16 sm:w-16 text-gray-600 mx-auto mb-6 sm:mb-8" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Your Cart is Empty</h2>
+            <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 px-4">
               Add some items to your cart before proceeding to checkout.
             </p>
             <Link to="/">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3">
-                <ArrowLeft className="h-5 w-5 mr-2" />
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 sm:px-8 py-3 text-sm sm:text-base">
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Continue Shopping
               </Button>
             </Link>
@@ -164,7 +167,9 @@ export default function Checkout() {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
+               name === 'phone' || name === 'zipCode' || name === 'cardNumber' || name === 'cvv' ? 
+               parseInt(value) || 0 : value
     }));
   };
 
@@ -200,7 +205,8 @@ export default function Checkout() {
     setOrderComplete(true);
     dispatch(clearCart());
     
-    // Clear the dates from localStorage after successful order
+    // Clear the dates from localStorage after successful order completion only
+    // This ensures dates persist for future rentals until order is completed
     localStorage.removeItem('pickupDate');
     localStorage.removeItem('dropoffDate');
   };
@@ -227,27 +233,27 @@ export default function Checkout() {
             </div>
           </div>
         </header>
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-600 rounded-full mb-8">
-              <Check className="h-10 w-10 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-600 rounded-full mb-6 sm:mb-8">
+              <Check className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4">Order Confirmed!</h2>
-            <p className="text-xl text-gray-300 mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Order Confirmed!</h2>
+            <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 px-4">
               Thank you for your order. We'll send you a confirmation email shortly.
             </p>
-            <div className="bg-slate-800 rounded-lg p-6 max-w-md mx-auto mb-8">
+            <div className="bg-slate-800 rounded-lg p-4 sm:p-6 max-w-md mx-auto mb-6 sm:mb-8">
               <p className="text-white font-semibold">Order Number</p>
               <p className="text-purple-400 text-lg">#LR-{Date.now().toString().slice(-6)}</p>
             </div>
-            <div className="space-x-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/">
-                <Button variant="outline" className="border-slate-600 text-gray-300 hover:bg-slate-700">
+                <Button variant="outline" className="border-slate-600 text-gray-300 hover:bg-slate-700 w-full sm:w-auto">
                   Continue Shopping
                 </Button>
               </Link>
               <Button 
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
                 onClick={() => navigate('/orders')}
               >
                 Track Your Order
@@ -274,87 +280,106 @@ export default function Checkout() {
     <div className="min-h-screen bg-[#181622]">
       {/* Header */}
       <CommonNavbar/>
+      
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <nav className="flex text-sm text-gray-400">
-          <Link to="/" className="hover:text-purple-400">Home</Link>
+        <nav className="flex text-sm text-gray-400 overflow-x-auto">
+          <Link to="/" className="hover:text-purple-400 whitespace-nowrap">Home</Link>
           <span className="mx-2">/</span>
-          <Link to="/cart" className="hover:text-purple-400">Cart</Link>
+          <Link to="/a" className="hover:text-purple-400 whitespace-nowrap">Cart</Link>
           <span className="mx-2">/</span>
-          <span className="text-white">Checkout</span>
+          <span className="text-white whitespace-nowrap">Checkout</span>
         </nav>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-4">Checkout</h1>
-          {/* Progress Steps */}
-          <div className="flex justify-between items-center mb-8 max-w-2xl">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = currentStep === step.id;
-              const isCompleted = currentStep > step.id;
-              return (
-                <div key={step.id} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                    isCompleted 
-                      ? 'bg-purple-600 border-purple-600 text-white'
-                      : isActive 
-                        ? 'border-purple-600 text-purple-400'
-                        : 'border-slate-600 text-gray-400'
-                  }`}>
-                    {isCompleted ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <Icon className="h-5 w-5" />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-16">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Checkout</h1>
+          
+          {/* Progress Steps - Mobile Responsive */}
+          <div className="mb-6 sm:mb-8">
+            {/* Desktop Steps */}
+            <div className="hidden md:flex justify-between items-center max-w-2xl">
+              {steps.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = currentStep === step.id;
+                const isCompleted = currentStep > step.id;
+                return (
+                  <div key={step.id} className="flex items-center">
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                      isCompleted 
+                        ? 'bg-purple-600 border-purple-600 text-white'
+                        : isActive 
+                          ? 'border-purple-600 text-purple-400'
+                          : 'border-slate-600 text-gray-400'
+                    }`}>
+                      {isCompleted ? (
+                        <Check className="h-5 w-5" />
+                      ) : (
+                        <Icon className="h-5 w-5" />
+                      )}
+                    </div>
+                    <span className={`ml-2 text-sm font-medium ${
+                      isActive ? 'text-white' : 'text-gray-400'
+                    }`}>
+                      {step.name}
+                    </span>
+                    {index < steps.length - 1 && (
+                      <ChevronRight className={`ml-4 h-4 w-4 ${
+                        isCompleted ? 'text-purple-600' : 'text-slate-600'
+                      }`} />
                     )}
                   </div>
-                  <span className={`ml-2 text-sm font-medium ${
-                    isActive ? 'text-white' : 'text-gray-400'
-                  }`}>
-                    {step.name}
-                  </span>
-                  {index < steps.length - 1 && (
-                    <ChevronRight className={`ml-4 h-4 w-4 ${
-                      isCompleted ? 'text-purple-600' : 'text-slate-600'
-                    }`} />
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            
+            {/* Mobile Steps */}
+            <div className="md:hidden">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm text-gray-400">Step {currentStep} of {steps.length}</span>
+                <span className="text-sm text-white font-medium">{steps[currentStep - 1].name}</span>
+              </div>
+              <div className="w-full bg-slate-700 rounded-full h-2">
+                <div 
+                  className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(currentStep / steps.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Column: Product Details & Rental Period */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 order-2 xl:order-1">
             <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle className="text-white flex items-center justify-between">
+                <CardTitle className="text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <span className="flex items-center">
-                    <ShoppingCart className="h-6 w-6 mr-2 text-purple-400" />
+                    <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-400" />
                     Your Equipment ({totalItems} items)
                   </span>
                   <Link to="/cart">
-                    <Button variant="outline" size="sm" className="border-slate-600 text-gray-300 hover:bg-slate-700">
-                      <Edit className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="border-slate-600 text-gray-300 hover:bg-slate-700 text-xs sm:text-sm">
+                      <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                       Edit Cart
                     </Button>
                   </Link>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 {cart.map((item: CartItem) => (
-                  <div key={item._id} className="bg-slate-700 rounded-lg p-4">
-                    <div className="flex items-start space-x-4">
+                  <div key={item._id} className="bg-slate-700 rounded-lg p-3 sm:p-4">
+                    <div className="flex items-start space-x-3 sm:space-x-4">
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-20 h-20 object-cover rounded-lg"
+                        className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <h4 className="text-white font-semibold mb-2">{item.name}</h4>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-white font-semibold mb-2 text-sm sm:text-base truncate">{item.name}</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
                           <div>
                             <span className="text-gray-400">Quantity:</span>
                             <div className="flex items-center space-x-2 mt-1">
@@ -389,12 +414,12 @@ export default function Checkout() {
             <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
-                  <Calendar className="h-6 w-6 mr-2 text-purple-400" />
+                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-400" />
                   Rental Period
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Start Date *
@@ -406,7 +431,7 @@ export default function Checkout() {
                       value={formData.startDate}
                       onChange={handleInputChange}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
                   <div>
@@ -420,15 +445,15 @@ export default function Checkout() {
                       value={formData.endDate}
                       onChange={handleInputChange}
                       min={formData.startDate}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
                 </div>
                 {formData.startDate && formData.endDate && (
-                  <div className="bg-slate-700 rounded-lg p-4">
+                  <div className="bg-slate-700 rounded-lg p-3 sm:p-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Rental Duration:</span>
-                      <span className="text-white font-semibold">
+                      <span className="text-gray-300 text-sm">Rental Duration:</span>
+                      <span className="text-white font-semibold text-sm">
                         {Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24))} days
                       </span>
                     </div>
@@ -442,36 +467,36 @@ export default function Checkout() {
               <CardHeader>
                 <CardTitle className="text-white">Order Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
-                  <div className="flex justify-between text-gray-300">
+                  <div className="flex justify-between text-gray-300 text-sm">
                     <span>Subtotal ({totalItems} items):</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   {formData.insurance && (
-                    <div className="flex justify-between text-gray-300">
+                    <div className="flex justify-between text-gray-300 text-sm">
                       <span>Equipment Insurance:</span>
                       <span>${insurance.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-gray-300">
+                  <div className="flex justify-between text-gray-300 text-sm">
                     <span>Shipping:</span>
                     <span>${expeditedShipping.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-300">
+                  <div className="flex justify-between text-gray-300 text-sm">
                     <span>Tax (8%):</span>
                     <span>${tax.toFixed(2)}</span>
                   </div>
                   <div className="border-t border-slate-600 pt-2">
-                    <div className="flex justify-between text-white font-bold text-lg">
+                    <div className="flex justify-between text-white font-bold text-base sm:text-lg">
                       <span>Total:</span>
                       <span>${total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
                 <div className="bg-slate-700 rounded-lg p-3">
-                  <div className="flex items-center text-green-400 text-sm">
-                    <Shield className="h-4 w-4 mr-2" />
+                  <div className="flex items-center text-green-400 text-xs sm:text-sm">
+                    <Shield className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                     <span>Secure SSL encrypted checkout</span>
                   </div>
                 </div>
@@ -480,14 +505,14 @@ export default function Checkout() {
           </div>
 
           {/* Right Column: Step-by-Step Forms */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 order-1 xl:order-2">
             {/* Step 1: Customer Information */}
             {currentStep === 1 && (
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center justify-between">
+                  <CardTitle className="text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <span className="flex items-center">
-                      <User className="h-6 w-6 mr-2 text-purple-400" />
+                      <User className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-400" />
                       Customer Information
                     </span>
                     {user && (
@@ -495,16 +520,16 @@ export default function Checkout() {
                         onClick={useProfileInfo}
                         variant="outline"
                         size="sm"
-                        className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                        className="border-slate-600 text-gray-300 hover:bg-slate-700 text-xs sm:text-sm"
                       >
-                        <UserCheck className="h-4 w-4 mr-2" />
+                        <UserCheck className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         Use Profile Info
                       </Button>
                     )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         First Name *
@@ -515,7 +540,7 @@ export default function Checkout() {
                         required
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
                     </div>
                     <div>
@@ -528,7 +553,7 @@ export default function Checkout() {
                         required
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
                     </div>
                   </div>
@@ -542,7 +567,7 @@ export default function Checkout() {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
                   <div>
@@ -550,20 +575,20 @@ export default function Checkout() {
                       Phone Number *
                     </label>
                     <input
-                      type="tel"
+                      type="number"
                       name="phone"
                       required
-                      value={formData.phone}
+                      value={formData.phone || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-3 sm:pt-4">
                     <Button 
                       onClick={() => setCurrentStep(2)}
                       disabled={!canProceedToStep2}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
                     >
                       Continue to Delivery Address
                     </Button>
@@ -576,9 +601,9 @@ export default function Checkout() {
             {currentStep === 2 && (
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center justify-between">
+                  <CardTitle className="text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <span className="flex items-center">
-                      <MapPin className="h-6 w-6 mr-2 text-purple-400" />
+                      <MapPin className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-400" />
                       Delivery Address
                     </span>
                     {user?.address && (
@@ -586,15 +611,15 @@ export default function Checkout() {
                         onClick={useProfileAddress}
                         variant="outline"
                         size="sm"
-                        className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                        className="border-slate-600 text-gray-300 hover:bg-slate-700 text-xs sm:text-sm"
                       >
-                        <UserCheck className="h-4 w-4 mr-2" />
+                        <UserCheck className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         Use Profile Address
                       </Button>
                     )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Street Address *
@@ -605,10 +630,10 @@ export default function Checkout() {
                       required
                       value={formData.address}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         City *
@@ -619,7 +644,7 @@ export default function Checkout() {
                         required
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
                     </div>
                     <div>
@@ -632,7 +657,7 @@ export default function Checkout() {
                         required
                         value={formData.state}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
                     </div>
                   </div>
@@ -641,12 +666,12 @@ export default function Checkout() {
                       ZIP Code *
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       name="zipCode"
                       required
-                      value={formData.zipCode}
+                      value={formData.zipCode || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
                   <div>
@@ -659,22 +684,22 @@ export default function Checkout() {
                       required
                       value={formData.country}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
 
-                  <div className="flex space-x-4 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
                     <Button 
                       variant="outline"
                       onClick={() => setCurrentStep(1)}
-                      className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                      className="border-slate-600 text-gray-300 hover:bg-slate-700 text-sm sm:text-base"
                     >
                       Back
                     </Button>
                     <Button 
                       onClick={() => setCurrentStep(3)}
                       disabled={!canProceedToStep3}
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
                     >
                       Continue to Payment
                     </Button>
@@ -688,11 +713,11 @@ export default function Checkout() {
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
-                    <CreditCard className="h-6 w-6 mr-2 text-purple-400" />
+                    <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-400" />
                     Payment Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Cardholder Name *
@@ -703,7 +728,7 @@ export default function Checkout() {
                       required
                       value={formData.cardholderName}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
                   <div>
@@ -711,16 +736,16 @@ export default function Checkout() {
                       Card Number *
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       name="cardNumber"
                       required
                       placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber}
+                      value={formData.cardNumber || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Expiry Date *
@@ -732,7 +757,7 @@ export default function Checkout() {
                         placeholder="MM/YY"
                         value={formData.expiryDate}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
                     </div>
                     <div>
@@ -740,53 +765,53 @@ export default function Checkout() {
                         CVV *
                       </label>
                       <input
-                        type="text"
+                        type="number"
                         name="cvv"
                         required
                         placeholder="123"
-                        value={formData.cvv}
+                        value={formData.cvv || ''}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-4">
-                    <label className="flex items-center space-x-3">
+                  <div className="space-y-3 pt-3 sm:pt-4">
+                    <label className="flex items-start space-x-3">
                       <input
                         type="checkbox"
                         name="insurance"
                         checked={formData.insurance}
                         onChange={handleInputChange}
-                        className="w-4 h-4 text-purple-600 bg-slate-700 border-slate-600 rounded focus:ring-purple-600"
+                        className="w-4 h-4 text-purple-600 bg-slate-700 border-slate-600 rounded focus:ring-purple-600 mt-0.5"
                       />
-                      <span className="text-gray-300">Add equipment insurance (10% of rental cost)</span>
+                      <span className="text-gray-300 text-sm">Add equipment insurance (10% of rental cost)</span>
                     </label>
                     
-                    <label className="flex items-center space-x-3">
+                    <label className="flex items-start space-x-3">
                       <input
                         type="checkbox"
                         name="expeditedShipping"
                         checked={formData.expeditedShipping}
                         onChange={handleInputChange}
-                        className="w-4 h-4 text-purple-600 bg-slate-700 border-slate-600 rounded focus:ring-purple-600"
+                        className="w-4 h-4 text-purple-600 bg-slate-700 border-slate-600 rounded focus:ring-purple-600 mt-0.5"
                       />
-                      <span className="text-gray-300">Expedited shipping (+$10)</span>
+                      <span className="text-gray-300 text-sm">Expedited shipping (+$10)</span>
                     </label>
                   </div>
 
-                  <div className="flex space-x-4 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
                     <Button 
                       variant="outline"
                       onClick={() => setCurrentStep(2)}
-                      className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                      className="border-slate-600 text-gray-300 hover:bg-slate-700 text-sm sm:text-base"
                     >
                       Back
                     </Button>
                     <Button 
                       onClick={() => setCurrentStep(4)}
                       disabled={!canProceedToStep4}
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
                     >
                       Review Order
                     </Button>
@@ -800,48 +825,48 @@ export default function Checkout() {
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
-                    <Shield className="h-6 w-6 mr-2 text-purple-400" />
+                    <Shield className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-400" />
                     Review Your Order
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 sm:space-y-6">
                   <div>
-                    <h4 className="text-white font-medium mb-3">Customer Information</h4>
-                    <div className="bg-slate-700 rounded-lg p-4 text-gray-300">
+                    <h4 className="text-white font-medium mb-3 text-sm sm:text-base">Customer Information</h4>
+                    <div className="bg-slate-700 rounded-lg p-3 sm:p-4 text-gray-300 text-sm">
                       <p>{formData.firstName} {formData.lastName}</p>
                       <p>{formData.email}</p>
-                      <p>{formData.phone}</p>
+                      <p>{formData.phone || 'Not provided'}</p>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-white font-medium mb-3">Delivery Address</h4>
-                    <div className="bg-slate-700 rounded-lg p-4 text-gray-300">
+                    <h4 className="text-white font-medium mb-3 text-sm sm:text-base">Delivery Address</h4>
+                    <div className="bg-slate-700 rounded-lg p-3 sm:p-4 text-gray-300 text-sm">
                       <p>{formData.address}</p>
-                      <p>{formData.city}, {formData.state} {formData.zipCode}</p>
+                      <p>{formData.city}, {formData.state} {formData.zipCode || 'N/A'}</p>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-white font-medium mb-3">Payment Method</h4>
-                    <div className="bg-slate-700 rounded-lg p-4 text-gray-300">
-                      <p>**** **** **** {formData.cardNumber.slice(-4)}</p>
+                    <h4 className="text-white font-medium mb-3 text-sm sm:text-base">Payment Method</h4>
+                    <div className="bg-slate-700 rounded-lg p-3 sm:p-4 text-gray-300 text-sm">
+                      <p>**** **** **** {formData.cardNumber.toString().slice(-4)}</p>
                       <p>{formData.cardholderName}</p>
                     </div>
                   </div>
 
-                  <div className="flex space-x-4 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
                     <Button 
                       variant="outline"
                       onClick={() => setCurrentStep(3)}
-                      className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                      className="border-slate-600 text-gray-300 hover:bg-slate-700 text-sm sm:text-base"
                     >
                       Back
                     </Button>
                     <Button 
                       onClick={handleSubmitOrder}
                       disabled={isProcessing}
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
                     >
                       {isProcessing ? "Processing..." : `Complete Order - $${total.toFixed(2)}`}
                     </Button>

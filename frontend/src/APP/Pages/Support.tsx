@@ -6,6 +6,7 @@ import { Input } from "../../components/ui/Input";
 import { Textarea } from "../../components/ui/Textarea";
 import {  Mail, Phone, MessageCircle, Search, Clock, FileText, Shield, Truck, Camera, Settings, ChevronRight, CheckCircle, HelpCircle, MessageSquare } from "lucide-react";
 import CommonNavbar from "../../components/ui/CommonNavbar";
+import Footer from "../../components/ui/Footer";
 // Remove useCart for now, or replace with a selector if you have Redux
 // import { useCart } from "@/contexts/CartContext";
 
@@ -110,10 +111,10 @@ export default function Support() {
   const [activeTab, setActiveTab] = useState<'faq' | 'contact' | 'topics'>('faq');
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-[#181622]">
     
 <CommonNavbar/>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-[#0F172A]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-[#181622]">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">How can we help you?</h1>
@@ -358,9 +359,11 @@ export default function Support() {
                 </Button>
               </CardContent>
             </Card>
+         
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 } 

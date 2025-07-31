@@ -9,6 +9,7 @@ import CartModal from '../../components/ui/CartModal';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../../components/ui/Footer';
 
 interface Product {
   _id: string;
@@ -164,8 +165,6 @@ const CameraProducts: React.FC = () => {
               </div>
             </div>
           </div>
-          {/* Extended Filters */}
-          {/* Removed extended filter section as requested */}
         </div>
         {/* Product Grid */}
         <main className="flex-1">
@@ -231,7 +230,6 @@ const CameraProducts: React.FC = () => {
           )}
         </main>
       </div>
-      {/* Cart Icon Button */}
       {showCartButton && (
         <button
           className="fixed top-6 right-8 z-50 bg-purple-600 hover:bg-purple-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg text-3xl"
@@ -249,6 +247,7 @@ const CameraProducts: React.FC = () => {
         total={cartTotal}
         onUpdateQuantity={handleUpdateQuantity}
       />
+      <Footer />
     </div>
   );
 };

@@ -632,10 +632,13 @@ export const getOrderAnalytics = async (req, res) => {
 
 export const getUserAnalytics = async (req, res) => {
   try {
+    console.log('getUserAnalytics: Request received');
     const { period = '30' } = req.query;
     const days = parseInt(period);
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
+    
+    console.log('getUserAnalytics: Period:', period, 'Days:', days, 'StartDate:', startDate);
     
     // User registration trends
     const dailyRegistrations = await User.aggregate([
@@ -659,6 +662,8 @@ export const getUserAnalytics = async (req, res) => {
       }
     ]);
     
+    console.log('getUserAnalytics: Daily registrations:', dailyRegistrations.length);
+    
     // User status distribution
     const statusDistribution = await User.aggregate([
       {
@@ -668,6 +673,8 @@ export const getUserAnalytics = async (req, res) => {
         }
       }
     ]);
+    
+    console.log('getUserAnalytics: Status distribution:', statusDistribution);
     
     // Top users by order count
     const topUsers = await Order.aggregate([
@@ -696,7 +703,7 @@ export const getUserAnalytics = async (req, res) => {
       },
       {
         $project: {
-          username: '$user.username',
+          name: '$user.username',
           email: '$user.email',
           orderCount: 1,
           totalSpent: 1
@@ -710,12 +717,27 @@ export const getUserAnalytics = async (req, res) => {
       }
     ]);
     
-    res.json({
-      dailyRegistrations,
-      statusDistribution,
-      topUsers
-    });
+    console.log('getUserAnalytics: Top users:', topUsers.length);
+    
+    // If no data, provide sample data for testing
+    const response = {
+      dailyRegistrations: dailyRegistrations.length > 0 ? dailyRegistrations : [
+        {
+          _id: { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() },
+          count: 0
+        }
+      ],
+      statusDistribution: statusDistribution.length > 0 ? statusDistribution : [
+        { _id: 'active', count: 0 },
+        { _id: 'disabled', count: 0 }
+      ],
+      topUsers: topUsers.length > 0 ? topUsers : []
+    };
+    
+    console.log('getUserAnalytics: Sending response');
+    res.json(response);
   } catch (err) {
+    console.error('Error in getUserAnalytics:', err);
     res.status(500).json({ message: 'Server error.', error: err.message });
   }
 };

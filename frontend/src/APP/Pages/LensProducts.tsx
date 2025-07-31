@@ -233,7 +233,7 @@ const LensProducts: React.FC = () => {
         onRemove={() => {}}
         total={cartTotal}
         onUpdateQuantity={() => {}}
-        onUpdateRentalDays={() => {}}
+       
       />
     </div>
   );

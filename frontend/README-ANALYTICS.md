@@ -25,7 +25,7 @@ The Camera Rental Analytics Dashboard provides comprehensive insights into user 
 ### 3. Orders Analytics
 - **Order Trends**: Daily order patterns and revenue
 - **Status Distribution**: Pie chart showing order status breakdown
-- **Top Products by Revenue**: Bar chart of highest-earning products
+- **Top Products by Revenue**: Bar chart of highest-earning productshome
 - **Period Filtering**: 7, 30, or 90-day analysis periods
 - **Detailed Product Table**: Complete breakdown of product performance
 

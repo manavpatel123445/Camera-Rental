@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import AdminLayout from '../components/AdminLayout';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   _id: string;
@@ -18,15 +19,37 @@ export default function UsersList() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [statusLoading, setStatusLoading] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
+        // Try both adminToken and token for compatibility
+        const adminToken = localStorage.getItem('adminToken');
         const token = localStorage.getItem('token');
+        const authToken = adminToken || token;
+        
+        if (!authToken) {
+          setError('No authentication token found. Please log in again.');
+          return;
+        }
+
         const res = await fetch('http://localhost:3000/api/admin/users', {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          headers: { 
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
         });
+        
+        if (res.status === 401) {
+          setError('Authentication failed. Please log in again.');
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('token');
+          navigate('/admin/login');
+          return;
+        }
+        
         const data = await res.json();
         if (res.ok) {
           setUsers(data);
@@ -34,13 +57,13 @@ export default function UsersList() {
           setError(data.message || 'Failed to fetch users.');
         }
       } catch (err) {
-        setError('Network error.');
+        setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
       }
     };
     fetchUsers();
-  }, []);
+  }, [navigate]);
 
   const filteredUsers = users.filter(
     user =>
@@ -52,6 +75,7 @@ export default function UsersList() {
     setSelectedUser(user);
     setModalOpen(true);
   };
+  
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedUser(null);
@@ -60,15 +84,33 @@ export default function UsersList() {
   const handleStatusChange = async (userId: string, newStatus: 'active' | 'disabled') => {
     setStatusLoading(userId);
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const token = localStorage.getItem('token');
+      const authToken = adminToken || token;
+      
+      if (!authToken) {
+        alert('No authentication token found. Please log in again.');
+        navigate('/admin/login');
+        return;
+      }
+
       const res = await fetch(`http://localhost:3000/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
+      
+      if (res.status === 401) {
+        alert('Authentication failed. Please log in again.');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('token');
+        navigate('/admin/login');
+        return;
+      }
+      
       const data = await res.json();
       if (res.ok) {
         setUsers(prev => prev.map(u => u._id === userId ? { ...u, status: newStatus } : u));
@@ -76,7 +118,7 @@ export default function UsersList() {
         alert(data.message || 'Failed to update user status.');
       }
     } catch (err) {
-      alert('Network error.');
+      alert('Network error. Please try again.');
     } finally {
       setStatusLoading(null);
     }

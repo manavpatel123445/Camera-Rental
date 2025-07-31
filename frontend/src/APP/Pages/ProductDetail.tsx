@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import CommonNavbar from '../../components/ui/CommonNavbar';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../cart/cartSlice';
+import Footer from '../../components/ui/Footer';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,12 +12,10 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [pickupDate, setPickupDate] = useState('');
   const [dropoffDate, setDropoffDate] = useState('');
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('details');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [reviewLoading, setReviewLoading] = useState(true);
-  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -25,6 +24,11 @@ const ProductDetail: React.FC = () => {
         const res = await fetch(`http://localhost:3000/api/products/${id}`);
         const data = await res.json();
         setProduct(data);
+        
+        // Fetch related products
+        const relatedRes = await fetch(`http://localhost:3000/api/products?category=${data.category}&limit=4`);
+        const relatedData = await relatedRes.json();
+        setRelatedProducts(relatedData.filter((p: any) => p._id !== id));
       } catch (err) {
         setProduct(null);
       } finally {
@@ -32,27 +36,34 @@ const ProductDetail: React.FC = () => {
       }
     };
     if (id) fetchProduct();
-    // Initialize dates from localStorage if available
-    const storedPickup = localStorage.getItem('pickupDate');
-    const storedDropoff = localStorage.getItem('dropoffDate');
-    if (storedPickup) setPickupDate(storedPickup);
-    if (storedDropoff) setDropoffDate(storedDropoff);
-  }, [id]);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      setReviewLoading(true);
-      try {
-        const res = await fetch(`http://localhost:3000/api/products/${id}/reviews`);
-        const data = await res.json();
-        setReviews(data);
-      } catch (err) {
-        setReviews([]);
-      } finally {
-        setReviewLoading(false);
+    
+    // Initialize dates from localStorage with better validation
+    const initializeDates = () => {
+      const storedPickup = localStorage.getItem('pickupDate');
+      const storedDropoff = localStorage.getItem('dropoffDate');
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Set pickup date (use stored or default to today)
+      if (storedPickup && storedPickup >= today) {
+        setPickupDate(storedPickup);
+      } else {
+        setPickupDate(today);
+        localStorage.setItem('pickupDate', today);
+      }
+      
+      // Set dropoff date (use stored or default to tomorrow)
+      if (storedDropoff && storedDropoff > (storedPickup || today)) {
+        setDropoffDate(storedDropoff);
+      } else {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        setDropoffDate(tomorrowStr);
+        localStorage.setItem('dropoffDate', tomorrowStr);
       }
     };
-    if (id) fetchReviews();
+    
+    initializeDates();
   }, [id]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0F172A] text-white">Loading...</div>;
@@ -102,172 +113,287 @@ const ProductDetail: React.FC = () => {
     navigate('/checkout');
   };
 
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3000/api/products/${id}/reviews`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(newReview),
-      });
-      if (res.ok) {
-        setNewReview({ rating: 5, comment: '' });
-        // Refresh reviews
-        const data = await res.json();
-        setReviews((prev) => [data, ...prev]);
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const reviewCount = reviews.length;
-  const averageRating = reviewCount
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1)
-    : null;
-
   // When date pickers change, save to localStorage
   const handlePickupDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPickupDate(e.target.value);
-    localStorage.setItem('pickupDate', e.target.value);
-    // If dropoffDate is before new pickupDate, reset dropoffDate
-    if (dropoffDate && e.target.value > dropoffDate) {
-      setDropoffDate(e.target.value);
-      localStorage.setItem('dropoffDate', e.target.value);
+    const newPickupDate = e.target.value;
+    setPickupDate(newPickupDate);
+    localStorage.setItem('pickupDate', newPickupDate);
+    
+    // If dropoffDate is before new pickupDate, reset dropoffDate to pickupDate + 1 day
+    if (dropoffDate && newPickupDate >= dropoffDate) {
+      const newDropoffDate = new Date(newPickupDate);
+      newDropoffDate.setDate(newDropoffDate.getDate() + 1);
+      const newDropoffDateStr = newDropoffDate.toISOString().split('T')[0];
+      setDropoffDate(newDropoffDateStr);
+      localStorage.setItem('dropoffDate', newDropoffDateStr);
     }
   };
+  
   const handleDropoffDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDropoffDate(e.target.value);
-    localStorage.setItem('dropoffDate', e.target.value);
+    const newDropoffDate = e.target.value;
+    setDropoffDate(newDropoffDate);
+    localStorage.setItem('dropoffDate', newDropoffDate);
+  };
+
+  // Function to reset dates to default values
+  const resetDates = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    setPickupDate(today);
+    setDropoffDate(tomorrowStr);
+    localStorage.setItem('pickupDate', today);
+    localStorage.setItem('dropoffDate', tomorrowStr);
   };
   // Today's date in yyyy-mm-dd format
   const today = new Date().toISOString().split('T')[0];
 
+  // Mock specifications and features
+  const specifications = [
+    { label: 'Brand', value: product.brand || 'Professional' },
+    { label: 'Model', value: product.name.split(' ').slice(-2).join(' ') || 'Standard' },
+    { label: 'Resolution', value: '4K Ultra HD' },
+    { label: 'Sensor Type', value: 'CMOS' },
+    { label: 'Weight', value: '2.5 kg' },
+    { label: 'Battery Life', value: '8 hours' },
+  ];
+
+  const features = [
+    '4K Video Recording',
+    'Image Stabilization',
+    'WiFi Connectivity',
+    'Touch Screen Display',
+    'Weather Sealed',
+    'Professional Audio Inputs',
+    'Multiple Recording Formats',
+    'Advanced Autofocus System'
+  ];
+
   return (
-    <div className="min-h-screen bg-[#181622] flex flex-col  ">
+    <div className="min-h-screen bg-[#181622] flex flex-col">
       <CommonNavbar />
-      <div className="w-full min-h-[70vh] flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 py-8 md:py-0">
-        {/* Image */}
-        <div className="flex-1 flex items-center justify-center w-full max-w-lg">
-          <img
-            src={product.image?.startsWith('http') ? product.image : `http://localhost:3000/${product.image}`}
-            alt={product.name}
-            className="rounded-xl  w-full max-w-xs h-80 object-contain border "
-          />
-        </div>
-        {/* Details */}
-        <div className="flex-1 flex flex-col gap-4 w-full max-w-xl">
-          <div className="mb-2">
-            <span className="text-xs text-gray-400 font-mono">ID: {product._id || 'N/A'}</span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-white mb-2 uppercase leading-tight">{product.name}</h1>
-          <div className="flex items-center gap-2 mb-2">
-            {averageRating && (
-              <>
-                <span className="text-yellow-400 text-lg font-bold">
-                  {Array.from({ length: 5 }, (_, i) =>
-                    i < Math.round(Number(averageRating))
-                      ? '★'
-                      : '☆'
-                  ).join('')}
-                </span>
-                <span className="text-white font-semibold ml-1">{averageRating}</span>
-                <span className="text-gray-400 text-sm ml-1">
-                  ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
-                </span>
-              </>
-            )}
-          </div>
-          <div className="text-white text-base font-bold mb-4 leading-relaxed">{product.description}</div>
-          <div className="flex items-center gap-4 mb-2">
-            {discount > 0 && (
-              <span className="text-purple-400 font-bold text-lg">-{discount}%</span>
-            )}
-            <span className="text-2xl font-bold text-white">₹{product.pricePerDay}</span>
-            {originalPrice > product.pricePerDay && (
-              <span className="text-gray-400 line-through text-lg font-bold">₹{originalPrice}</span>
-            )}
-          </div>
-          
-          {/* Date Pickers */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex flex-col w-full">
-              <label className="text-white text-sm font-bold mb-1">Pickup Date</label>
-              <input type="date" className="border border-[#232136] bg-[#1E293B] text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" value={pickupDate} onChange={handlePickupDateChange} min={today} />
-            </div>
-            <div className="flex flex-col w-full">
-              <label className="text-white text-sm font-bold mb-1">Drop-off Date</label>
-              <input type="date" className="border border-[#232136] bg-[#1E293B] text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" value={dropoffDate} onChange={handleDropoffDateChange} min={pickupDate || today} />
+      
+      {/* Breadcrumb */}
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <nav className="flex text-sm text-gray-400">
+          <button onClick={() => navigate('/')} className="hover:text-purple-400">Home</button>
+          <span className="mx-2">/</span>
+          <button onClick={() => navigate(-1)} className="hover:text-purple-400">Products</button>
+          <span className="mx-2">/</span>
+          <span className="text-white">{product.name}</span>
+        </nav>
+      </div>
+
+      <div className="w-full  mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left Column - Image */}
+          <div className="space-y-6">
+            <div className=" rounded-2xl p-2 flex items-center justify-center">
+              <img
+                src={product.image?.startsWith('http') ? product.image : `http://localhost:3000/${product.image}`}
+                alt={product.name}
+                className="w-full max-w-md h-96 object-contain"
+              />
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 mt-2 w-full">
-            <Button className="bg-[#232136] hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg flex-1" onClick={handleRentNow}>
-             Rent Now
-            </Button>
-            <Button className="bg-[#232136] hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg flex-1" onClick={handleAddToCart}>
-              Add to Cart
-            </Button>
+
+          {/* Right Column - Details */}
+          <div className="space-y-6">
+            {/* Product Header */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-3 py-1 bg-purple-600 text-white text-xs rounded-full font-semibold">
+                  {product.category}
+                </span>
+                <span className="px-3 py-1 bg-green-600 text-white text-xs rounded-full font-semibold">
+                  Available
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-2">{product.name}</h1>
+              <p className="text-gray-400 text-lg">{product.description}</p>
+            </div>
+
+            {/* Price Section */}
+            <div className="bg-[#232136] rounded-xl p-6">
+              <div className="flex items-center gap-4 mb-4">
+                {discount > 0 && (
+                  <span className="px-3 py-1 bg-red-600 text-white text-sm rounded-full font-semibold">
+                    -{discount}% OFF
+                  </span>
+                )}
+                <span className="text-3xl font-bold text-white">₹{product.pricePerDay}</span>
+                <span className="text-gray-400">/day</span>
+                {originalPrice > product.pricePerDay && (
+                  <span className="text-gray-400 line-through">₹{originalPrice}</span>
+                )}
+              </div>
+              
+              {/* Date Pickers */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="text-white text-sm font-semibold mb-2 block">Pickup Date</label>
+                  <input 
+                    type="date" 
+                    className="w-full border border-gray-600 bg-[#1E293B] text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    value={pickupDate} 
+                    onChange={handlePickupDateChange} 
+                    min={today} 
+                  />
+                </div>
+                <div>
+                  <label className="text-white text-sm font-semibold mb-2 block">Drop-off Date</label>
+                  <input 
+                    type="date" 
+                    className="w-full border border-gray-600 bg-[#1E293B] text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    value={dropoffDate} 
+                    onChange={handleDropoffDateChange} 
+                    min={pickupDate || today} 
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <Button 
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg text-lg" 
+                  onClick={handleRentNow}
+                >
+                  🚀 Rent Now
+                </Button>
+                <Button 
+                  className="w-full bg-[#1E293B] hover:bg-[#2D3748] text-white font-semibold py-3 px-6 rounded-lg text-lg border border-gray-600" 
+                  onClick={handleAddToCart}
+                >
+                  🛒 Add to Cart
+                </Button>
+              </div>
+            </div>
+
+            {/* Quick Info */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#232136] rounded-lg p-4 text-center">
+                <div className="text-2xl mb-1">📦</div>
+                <div className="text-white font-semibold">Free Delivery</div>
+                <div className="text-gray-400 text-sm">Within 24 hours</div>
+              </div>
+              <div className="bg-[#232136] rounded-lg p-4 text-center">
+                <div className="text-2xl mb-1">🛡️</div>
+                <div className="text-white font-semibold">Insurance</div>
+                <div className="text-gray-400 text-sm">Full coverage</div>
+              </div>
+            </div>
           </div>
-          <Button className="mt-4 text-gray-400 hover:text-purple-400 underline w-max" onClick={() => navigate(-1)}>
-            &larr; Back to Products
-          </Button>
+        </div>
+
+        {/* Tabs Section */}
+        <div className="mt-12">
+          <div className="border-b border-gray-700">
+            <nav className="flex space-x-8">
+              {[
+                { id: 'details', label: 'Details', icon: '📋' },
+                { id: 'specs', label: 'Specifications', icon: '⚙️' },
+                { id: 'features', label: 'Features', icon: '✨' },
+                { id: 'related', label: 'Related Products', icon: '🔗' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-purple-500 text-purple-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-300'
+                  }`}
+                >
+                  <span className="mr-2">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className="mt-8">
+            {activeTab === 'details' && (
+              <div className="bg-[#232136] rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Product Details</h3>
+                <p className="text-gray-300 leading-relaxed">{product.description}</p>
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-white font-semibold mb-2">What's Included</h4>
+                    <ul className="text-gray-300 space-y-1">
+                      <li>• Camera Body</li>
+                      <li>• Battery & Charger</li>
+                      <li>• Memory Card</li>
+                      <li>• Carrying Case</li>
+                      <li>• User Manual</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-white font-semibold mb-2">Rental Terms</h4>
+                    <ul className="text-gray-300 space-y-1">
+                      <li>• Minimum 1 day rental</li>
+                      <li>• Free pickup & delivery</li>
+                      <li>• Full insurance coverage</li>
+                      <li>• 24/7 support</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'specs' && (
+              <div className="bg-[#232136] rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Technical Specifications</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {specifications.map((spec, index) => (
+                    <div key={index} className="flex justify-between py-2 border-b border-gray-700">
+                      <span className="text-gray-400">{spec.label}</span>
+                      <span className="text-white font-medium">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'features' && (
+              <div className="bg-[#232136] rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Key Features</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {features.map((feature, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <span className="text-green-400">✓</span>
+                      <span className="text-gray-300">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'related' && (
+              <div className="bg-[#232136] rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Related Products</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {relatedProducts.slice(0, 4).map((relatedProduct) => (
+                    <div key={relatedProduct._id} className="bg-[#1E293B] rounded-lg p-4 cursor-pointer hover:border-purple-500 border-2 border-transparent transition-colors">
+                      <img
+                        src={relatedProduct.image?.startsWith('http') ? relatedProduct.image : `http://localhost:3000/${relatedProduct.image}`}
+                        alt={relatedProduct.name}
+                        className="w-full h-32 object-cover rounded-lg mb-3"
+                      />
+                      <h4 className="text-white font-semibold text-sm mb-1">{relatedProduct.name}</h4>
+                      <p className="text-purple-400 font-bold">₹{relatedProduct.pricePerDay}/day</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-      {/* Reviews Section */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold text-white mb-4">Reviews</h2>
-        {reviewLoading ? (
-          <div className="text-gray-400">Loading reviews...</div>
-        ) : reviews.length === 0 ? (
-          <div className="text-gray-400">No reviews yet.</div>
-        ) : (
-          <ul className="space-y-4">
-            {reviews.map((review) => (
-              <li key={review._id} className="bg-[#232136] rounded-lg p-4">
-                <div className="text-white font-semibold">{review.user?.username || 'Anonymous'}</div>
-                <div className="text-yellow-400">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</div>
-                <div className="text-gray-300">{review.comment}</div>
-                <div className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleString()}</div>
-              </li>
-            ))}
-          </ul>
-        )}
-        {/* Review Form */}
-        <form onSubmit={handleReviewSubmit} className="mt-6 bg-[#232136] p-4 rounded-lg">
-          <div className="mb-2">
-            <label className="text-white font-semibold">Rating:</label>
-            <select
-              value={newReview.rating}
-              onChange={e => setNewReview(r => ({ ...r, rating: Number(e.target.value) }))}
-              className="ml-2"
-            >
-              {[5,4,3,2,1].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-          <div className="mb-2">
-            <label className="text-white font-semibold">Comment:</label>
-            <textarea
-              value={newReview.comment}
-              onChange={e => setNewReview(r => ({ ...r, comment: e.target.value }))}
-              className="w-full mt-1 p-2 rounded"
-              rows={3}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-purple-600 text-white px-4 py-2 rounded"
-            disabled={submitting}
-          >
-            {submitting ? 'Submitting...' : 'Submit Review'}
-          </button>
-        </form>
-      </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

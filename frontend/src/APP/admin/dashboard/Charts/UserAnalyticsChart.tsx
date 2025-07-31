@@ -54,22 +54,34 @@ const UserAnalyticsChart: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('adminToken');
+      
+      // Try different token names
+      const adminToken = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('token');
+      const authToken = adminToken || token;
+      
+      console.log('UserAnalyticsChart: Fetching with token:', authToken ? 'Token exists' : 'No token');
+      
       const response = await fetch(`http://localhost:3000/api/admin/analytics/users?period=${period}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         }
       });
       
+      console.log('UserAnalyticsChart: Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('UserAnalyticsChart: Data received:', data);
         setAnalytics(data);
       } else {
         const errorData = await response.json();
+        console.error('UserAnalyticsChart: Error response:', errorData);
         setError(`Failed to fetch user analytics: ${errorData.message || response.statusText}`);
       }
     } catch (error) {
+      console.error('UserAnalyticsChart: Network error:', error);
       setError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
@@ -126,16 +138,23 @@ const UserAnalyticsChart: React.FC = () => {
     registrations: item.count
   }));
 
-  const statusData = analytics.statusDistribution.map(item => ({
-    name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
-    value: item.count
-  }));
+  const statusData = analytics.statusDistribution
+    .filter(item => item._id && typeof item._id === 'string') // Filter out null/undefined _id values
+    .map(item => ({
+      name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+      value: item.count
+    }));
 
   const topUsersData = analytics.topUsers.slice(0, 8).map(user => ({
-    name: user.name.length > 15 ? user.name.substring(0, 15) + '...' : user.name,
+    name: user.name && user.name.length > 15 ? user.name.substring(0, 15) + '...' : (user.name || 'Unknown User'),
     orders: user.orderCount,
     spent: user.totalSpent
   }));
+
+  // Check if we have any meaningful data
+  const hasRegistrationData = registrationData.some(item => item.registrations > 0);
+  const hasStatusData = statusData.some(item => item.value > 0);
+  const hasTopUsersData = topUsersData.length > 0;
 
   return (
     <div className="space-y-6">
@@ -156,80 +175,104 @@ const UserAnalyticsChart: React.FC = () => {
       {/* Registration Trends Chart */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">User Registration Trends</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={registrationData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip formatter={(value) => [value, 'Registrations']} />
-            <Area type="monotone" dataKey="registrations" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
-          </AreaChart>
-        </ResponsiveContainer>
+        {hasRegistrationData ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={registrationData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip formatter={(value) => [value, 'Registrations']} />
+              <Area type="monotone" dataKey="registrations" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            <p>No registration data available for the selected period</p>
+          </div>
+        )}
       </div>
 
       {/* User Status Distribution */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">User Status Distribution</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={statusData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {statusData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(value) => [value, 'Users']} />
-          </PieChart>
-        </ResponsiveContainer>
+        {hasStatusData ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={statusData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {statusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value) => [value, 'Users']} />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            <p>No user status data available</p>
+          </div>
+        )}
       </div>
 
       {/* Top Users */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Users by Orders</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={topUsersData} layout="horizontal">
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis dataKey="name" type="category" width={100} />
-            <Tooltip formatter={(value) => [value, 'Orders']} />
-            <Bar dataKey="orders" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
+        {hasTopUsersData ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={topUsersData} layout="horizontal">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
+              <YAxis dataKey="name" type="category" width={100} />
+              <Tooltip formatter={(value) => [value, 'Orders']} />
+              <Bar dataKey="orders" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            <p>No user order data available for the selected period</p>
+          </div>
+        )}
       </div>
 
       {/* Top Users Table */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Users Details</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Name</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Orders</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Total Spent</th>
-              </tr>
-            </thead>
-            <tbody>
-              {analytics.topUsers.map((user, index) => (
-                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4">{user.name}</td>
-                  <td className="py-3 px-4">{user.email}</td>
-                  <td className="py-3 px-4 font-semibold">{user.orderCount}</td>
-                  <td className="py-3 px-4 font-semibold">{formatRevenue(user.totalSpent)}</td>
+        {hasTopUsersData ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Name</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Orders</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Total Spent</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {analytics.topUsers.map((user, index) => (
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4">{user.name}</td>
+                    <td className="py-3 px-4">{user.email}</td>
+                    <td className="py-3 px-4 font-semibold">{user.orderCount}</td>
+                    <td className="py-3 px-4 font-semibold">{formatRevenue(user.totalSpent)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <p>No user order data available for the selected period</p>
+          </div>
+        )}
       </div>
     </div>
   );

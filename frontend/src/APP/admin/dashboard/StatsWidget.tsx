@@ -8,35 +8,68 @@ const StatsWidget = () => {
   useEffect(() => {
     const fetchProductCount = async () => {
       try {
+        const adminToken = localStorage.getItem('adminToken');
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:3000/api/products', {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        const authToken = adminToken || token;
+        
+        if (!authToken) {
+          setError('No authentication token found');
+          return;
+        }
+
+        const res = await fetch('http://localhost:3000/api/products/stats', {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
         });
+        
+        if (res.status === 401) {
+          setError('Authentication failed');
+          return;
+        }
+        
         const data = await res.json();
-        if (res.ok && Array.isArray(data)) {
-          setProductCount(data.length);
+        if (res.ok) {
+          setProductCount(data.total || 0);
         } else {
-          setError('Failed to fetch product count.');
+          setError(data.message || 'Failed to fetch stats');
         }
       } catch (err) {
-        setError('Network error.');
+        setError('Network error');
       } finally {
         setLoading(false);
       }
     };
+
     fetchProductCount();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="text-red-600">
+          <p className="text-sm">Error: {error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-blue-100 border border-blue-300 rounded-xl shadow-sm p-4 md:p-6 text-blue-900 flex flex-col items-center justify-center min-h-[120px]">
-      <div className="text-lg font-semibold mb-2">Total Products</div>
-      {loading ? (
-        <div className="text-blue-500">Loading...</div>
-      ) : error ? (
-        <div className="text-red-500">{error}</div>
-      ) : (
-        <div className="text-4xl font-bold">{productCount}</div>
-      )}
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Products</h3>
+      <p className="text-3xl font-bold text-blue-600">{productCount || 0}</p>
     </div>
   );
 };

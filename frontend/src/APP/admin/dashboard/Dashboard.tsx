@@ -27,14 +27,14 @@ const Dashboard = () => {
   }, []);
 
   const fetchProductStats = async () => {
-    try {
-      const res = await fetch('http://localhost:3000/api/products/stats');
-      const data = await res.json();
-      setProductStats(data);
-    } catch (err) {
-      // Optionally handle error
-    }
-  };
+      try {
+        const res = await fetch('http://localhost:3000/api/products/stats');
+        const data = await res.json();
+        setProductStats(data);
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
 
   const fetchDashboardAnalytics = async () => {
     try {
@@ -104,18 +104,18 @@ const Dashboard = () => {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
               <div className="text-2xl font-bold text-green-600">{dashboardAnalytics.orders?.total || 0}</div>
               <div className="text-gray-600">Total Orders</div>
-            </div>
+          </div>
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
               <div className="text-2xl font-bold text-purple-600">{dashboardAnalytics.products?.total || 0}</div>
               <div className="text-gray-600">Total Products</div>
-            </div>
+          </div>
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
               <div className="text-2xl font-bold text-orange-600">
                 ${dashboardAnalytics.trends?.monthlyOrders?.reduce((sum: number, item: any) => sum + item.totalRevenue, 0).toFixed(2) || '0.00'}
               </div>
               <div className="text-gray-600">Total Revenue</div>
-            </div>
-          </div>
+                  </div>
+                  </div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,14 +142,14 @@ const Dashboard = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Completed Orders:</span>
                   <span className="font-semibold">{dashboardAnalytics.orders?.completed || 0}</span>
-                </div>
+              </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Cancelled Orders:</span>
                   <span className="font-semibold">{dashboardAnalytics.orders?.cancelled || 0}</span>
                 </div>
               </div>
-            </div>
-          </div>
+                      </div>
+                    </div>
 
           {/* Product Categories */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -162,7 +162,7 @@ const Dashboard = () => {
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <div className="text-2xl font-bold text-green-600">{dashboardAnalytics.products?.lenses || 0}</div>
                 <div className="text-gray-600">Lenses</div>
-              </div>
+                </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
                 <div className="text-2xl font-bold text-purple-600">{dashboardAnalytics.products?.accessories || 0}</div>
                 <div className="text-gray-600">Accessories</div>

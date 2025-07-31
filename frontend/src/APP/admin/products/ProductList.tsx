@@ -21,29 +21,45 @@ const ProductList = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [search, setSearch] = useState('');
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewProduct, setViewProduct] = useState<Product | null>(null);
 
   const fetchProducts = async () => {
+    setLoading(true);
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const token = localStorage.getItem('token');
+      const authToken = adminToken || token;
+      
+      if (!authToken) {
+        setError('No authentication token found. Please log in again.');
+        return;
+      }
+
       const res = await fetch('http://localhost:3000/api/products', {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: { 
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
       });
+      
+      if (res.status === 401) {
+        setError('Authentication failed. Please log in again.');
+        return;
+      }
+      
       const data = await res.json();
       if (res.ok) {
         setProducts(data);
       } else {
         setError(data.message || 'Failed to fetch products.');
-        toast.error(data.message || 'Failed to fetch products.');
       }
     } catch (err) {
-      setError('Network error.');
-      toast.error('Network error occurred.');
+      setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -66,15 +82,33 @@ const ProductList = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
+        const adminToken = localStorage.getItem('adminToken');
         const token = localStorage.getItem('token');
+        const authToken = adminToken || token;
+        
+        if (!authToken) {
+          toast.error('No authentication token found. Please log in again.');
+          return;
+        }
+
         const res = await fetch(`http://localhost:3000/api/products/${id}`, {
           method: 'DELETE',
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          headers: { 
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
         });
+        
+        if (res.status === 401) {
+          toast.error('Authentication failed. Please log in again.');
+          return;
+        }
+        
         const data = await res.json();
         if (res.ok) {
           toast.success('Product deleted successfully!');
-          fetchProducts();
+          // Refresh the product list
+          window.location.reload();
         } else {
           toast.error(data.message || 'Failed to delete product.');
         }
@@ -93,19 +127,34 @@ const ProductList = () => {
   const handleToggleStatus = async (product: Product) => {
     const newStatus = product.status === "Active" ? "Inactive" : "Active";
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const token = localStorage.getItem('token');
+      const authToken = adminToken || token;
+      
+      if (!authToken) {
+        toast.error('No authentication token found. Please log in again.');
+        return;
+      }
+
       const res = await fetch(`http://localhost:3000/api/products/${product._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ status: newStatus }),
         credentials: 'include',
       });
+      
+      if (res.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
+        return;
+      }
+      
       if (res.ok) {
         toast.success(`Product ${newStatus === "Active" ? "activated" : "deactivated"}!`);
-        fetchProducts();
+        // Refresh the product list
+        window.location.reload();
       } else {
         toast.error('Failed to update status.');
       }

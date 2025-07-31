@@ -50,7 +50,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onClose, cart, onRemove, on
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black bg-opacity-60 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999]  bg-opacity-60 flex items-center justify-center p-4">
       <div className="bg-[#232136] rounded-2xl shadow-lg p-8 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
         <button
           className="absolute top-4 right-4 text-2xl text-gray-400 hover:text-purple-400 transition-colors"

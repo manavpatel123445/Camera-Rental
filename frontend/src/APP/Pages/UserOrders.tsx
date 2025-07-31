@@ -45,7 +45,7 @@ const UserOrders: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[#181622] text-white">
       <CommonNavbar />
       <div className="flex flex-1  py-8">
-        <div className="w-full  mx-auto rounded-2xl shadow-2xl p-8 md:p-12 bg-[#232136]">
+        <div className="w-full  mx-auto rounded-2xl shadow-2xl p-8 md:p-12 bg-[#181622]">
           <h1 className="text-3xl font-bold text-white mb-8 flex items-center gap-2"><FaListAlt /> My Orders</h1>
           {ordersLoading ? (
             <div className="text-gray-400">Loading orders...</div>
