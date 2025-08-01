@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { FaUpload, FaTag, FaList, FaDollarSign, FaAlignLeft, FaImage, FaTimes } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -66,7 +67,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
 
       const token = localStorage.getItem('adminToken');
       if (!token) {
-        alert('No authentication token found. Please log in again.');
+        toast.error('No authentication token found. Please log in again.');
         return;
       }
       
@@ -78,14 +79,15 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
 
       const data = await res.json();
       if (res.ok) {
+        toast.success('Product added successfully!');
         onSave(data); 
         setForm(initialForm);
         onClose();
       } else {
-        alert(data.message || 'Failed to add product.');
+        toast.error(data.message || 'Failed to add product.');
       }
     } catch (err) {
-      alert('Network error.');
+      toast.error('Network error. Please try again.');
     }
   };
 
