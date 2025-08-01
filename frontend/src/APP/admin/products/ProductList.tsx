@@ -38,7 +38,7 @@ const ProductList = () => {
         return;
       }
 
-      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/products', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -87,7 +87,7 @@ const ProductList = () => {
           return;
         }
 
-        const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/products/${id}`, {
+        const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${id}`, {
           method: 'DELETE',
           headers: { 
             Authorization: `Bearer ${token}`,
@@ -130,7 +130,7 @@ const ProductList = () => {
         return;
       }
 
-      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/products/${product._id}`, {
+      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${product._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

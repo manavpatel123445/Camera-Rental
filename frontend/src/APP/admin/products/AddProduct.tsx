@@ -98,7 +98,7 @@ const AddProduct = () => {
         setLoading(false);
         return;
       }
-             const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/products', {
+             const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
          method: 'POST',
          body: formData,
          headers: { Authorization: `Bearer ${token}` },
