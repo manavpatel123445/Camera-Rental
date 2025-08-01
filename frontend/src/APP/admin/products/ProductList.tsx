@@ -31,18 +31,16 @@ const ProductList = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const adminToken = localStorage.getItem('adminToken');
-      const token = localStorage.getItem('token');
-      const authToken = adminToken || token;
+      const token = localStorage.getItem('adminToken');
       
-      if (!authToken) {
+      if (!token) {
         setError('No authentication token found. Please log in again.');
         return;
       }
 
-      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/products', {
         headers: { 
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
@@ -82,19 +80,17 @@ const ProductList = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        const adminToken = localStorage.getItem('adminToken');
-        const token = localStorage.getItem('token');
-        const authToken = adminToken || token;
+        const token = localStorage.getItem('adminToken');
         
-        if (!authToken) {
+        if (!token) {
           toast.error('No authentication token found. Please log in again.');
           return;
         }
 
-        const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${id}`, {
+        const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/products/${id}`, {
           method: 'DELETE',
           headers: { 
-            Authorization: `Bearer ${authToken}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
         });
@@ -127,20 +123,18 @@ const ProductList = () => {
   const handleToggleStatus = async (product: Product) => {
     const newStatus = product.status === "Active" ? "Inactive" : "Active";
     try {
-      const adminToken = localStorage.getItem('adminToken');
-      const token = localStorage.getItem('token');
-      const authToken = adminToken || token;
+      const token = localStorage.getItem('adminToken');
       
-      if (!authToken) {
+      if (!token) {
         toast.error('No authentication token found. Please log in again.');
         return;
       }
 
-      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${product._id}`, {
+      const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/products/${product._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
         credentials: 'include',

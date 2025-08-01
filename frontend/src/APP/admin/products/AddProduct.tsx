@@ -98,11 +98,11 @@ const AddProduct = () => {
         setLoading(false);
         return;
       }
-      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
-        method: 'POST',
-        body: formData,
-        headers: { Authorization: `Bearer ${token}` },
-      });
+             const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/products', {
+         method: 'POST',
+         body: formData,
+         headers: { Authorization: `Bearer ${token}` },
+       });
       const data = await res.json();
       if (res.ok) {
         setSuccess('Product added successfully!');
@@ -158,18 +158,18 @@ const AddProduct = () => {
                   <label className="block font-semibold mb-2 text-sm">Category<span className="text-red-500">*</span></label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"><FaList /></span>
-                    <select
-                      name="category"
-                      value={form.category}
-                      onChange={handleChange}
-                      className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none bg-white"
-                      required
-                    >
-                      <option value="" disabled>Select category</option>
-                      {categoryOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
+                                         <select
+                       name="category"
+                       value={form.category || ''}
+                       onChange={handleChange}
+                       className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none bg-white"
+                       required
+                     >
+                       <option value="">Select category</option>
+                       {categoryOptions.map(option => (
+                         <option key={option} value={option}>{option}</option>
+                       ))}
+                     </select>
                   </div>
                 </div>
                 <div>

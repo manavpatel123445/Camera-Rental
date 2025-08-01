@@ -152,13 +152,17 @@ const OrdersList: React.FC = () => {
                     <button
                       className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1 rounded"
                       onClick={async () => {
-                        if (window.confirm('Are you sure you want to delete this order?')) {
-                          const token = localStorage.getItem('token');
-                          const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/orders/${order._id}`, {
-                            method: 'DELETE',
-                            headers: { Authorization: `Bearer ${token}` },
-                            credentials: 'include',
-                          });
+                                                 if (window.confirm('Are you sure you want to delete this order?')) {
+                           const token = localStorage.getItem('adminToken');
+                           if (!token) {
+                             alert('No authentication token found. Please log in again.');
+                             return;
+                           }
+                           const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/orders/${order._id}`, {
+                             method: 'DELETE',
+                             headers: { Authorization: `Bearer ${token}` },
+                             credentials: 'include',
+                           });
                           if (res.ok) {
                             setOrders(orders => orders.filter(o => o._id !== order._id));
                           }
