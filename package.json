@@ -7,12 +7,8 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build || echo 'Backend build completed'",
+    "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
-    "deploy": "npm run deploy:backend && npm run deploy:frontend",
-    "deploy:backend": "node scripts/deploy-backend.js",
-    "deploy:frontend": "node scripts/deploy-frontend.js",
-    "setup-auto-deploy": "node scripts/setup-auto-deploy.js",
     "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "cd backend && npm test",
     "test:frontend": "cd frontend && npm test"
