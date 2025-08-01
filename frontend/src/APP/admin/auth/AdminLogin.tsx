@@ -5,6 +5,7 @@ import { faEnvelope, faLock, faCamera } from "@fortawesome/free-solid-svg-icons"
 import { useDispatch } from "react-redux";
 import { loginAndFetchProfile } from "../../auth/authSlice";
 import toast from "react-hot-toast";
+import backgroundImage from "../../../assets/c.jpg";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -40,7 +41,7 @@ const AdminLogin = () => {
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
       style={{
-        backgroundImage: "url('/src/assets/c.jpg')",
+        backgroundImage: `url(${backgroundImage})`,
       }}
     >
       <form
