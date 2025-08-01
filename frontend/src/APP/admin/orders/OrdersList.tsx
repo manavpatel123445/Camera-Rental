@@ -31,9 +31,16 @@ const OrdersList: React.FC = () => {
       setLoading(true);
       setError('');
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          setError('No authentication token found. Please log in again.');
+          return;
+        }
         const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/orders', {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
           credentials: 'include',
         });
         const data = await res.json();
@@ -91,7 +98,11 @@ const OrdersList: React.FC = () => {
                       disabled={order.status === 'cancelled'}
                       onChange={async (e) => {
                         const newStatus = e.target.value;
-                        const token = localStorage.getItem('token');
+                        const token = localStorage.getItem('adminToken');
+                        if (!token) {
+                          alert('No authentication token found. Please log in again.');
+                          return;
+                        }
                         const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/admin/orders/${order._id}/status`, {
                           method: 'PATCH',
                           headers: {

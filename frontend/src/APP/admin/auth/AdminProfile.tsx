@@ -59,7 +59,11 @@ const AdminProfile = () => {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        toast.error('No authentication token found. Please log in again.');
+        return;
+      }
       const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/profile", {
         method: "PATCH",
         headers: {
@@ -146,7 +150,11 @@ const AdminProfile = () => {
       const formData = new FormData();
       formData.append('profileImage', file);
       
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        toast.error('No authentication token found. Please log in again.');
+        return;
+      }
       const res = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/profile/image", {
         method: "POST",
         headers: {
@@ -172,7 +180,7 @@ const AdminProfile = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('adminToken');
     dispatch(logout());
     toast.success('Logged out successfully');
     window.location.href = '/admin/login';

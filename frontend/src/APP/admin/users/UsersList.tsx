@@ -25,19 +25,16 @@ export default function UsersList() {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        // Try both adminToken and token for compatibility
-        const adminToken = localStorage.getItem('adminToken');
-        const token = localStorage.getItem('token');
-        const authToken = adminToken || token;
+        const token = localStorage.getItem('adminToken');
         
-        if (!authToken) {
+        if (!token) {
           setError('No authentication token found. Please log in again.');
           return;
         }
 
         const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/users', {
           headers: { 
-            Authorization: `Bearer ${authToken}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
         });
@@ -45,7 +42,6 @@ export default function UsersList() {
         if (res.status === 401) {
           setError('Authentication failed. Please log in again.');
           localStorage.removeItem('adminToken');
-          localStorage.removeItem('token');
           navigate('/admin/login');
           return;
         }
@@ -84,11 +80,9 @@ export default function UsersList() {
   const handleStatusChange = async (userId: string, newStatus: 'active' | 'disabled') => {
     setStatusLoading(userId);
     try {
-      const adminToken = localStorage.getItem('adminToken');
-      const token = localStorage.getItem('token');
-      const authToken = adminToken || token;
+      const token = localStorage.getItem('adminToken');
       
-      if (!authToken) {
+      if (!token) {
         alert('No authentication token found. Please log in again.');
         navigate('/admin/login');
         return;
@@ -98,7 +92,7 @@ export default function UsersList() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -106,7 +100,6 @@ export default function UsersList() {
       if (res.status === 401) {
         alert('Authentication failed. Please log in again.');
         localStorage.removeItem('adminToken');
-        localStorage.removeItem('token');
         navigate('/admin/login');
         return;
       }

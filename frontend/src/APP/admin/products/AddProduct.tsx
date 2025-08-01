@@ -92,11 +92,16 @@ const AddProduct = () => {
       if (imageType === 'url' && form.imageUrl) formData.append('imageUrl', form.imageUrl);
       if (form.splineUrl) formData.append('splineUrl', form.splineUrl);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        setError('No authentication token found. Please log in again.');
+        setLoading(false);
+        return;
+      }
       const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
         method: 'POST',
         body: formData,
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok) {
