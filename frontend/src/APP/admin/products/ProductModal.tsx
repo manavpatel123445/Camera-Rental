@@ -95,7 +95,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="text"
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="Product name"
-                value={form.name}
+                value={form.name || ''}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 required
               />
@@ -108,7 +108,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><FaList /></span>
               <select
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none"
-                value={form.category}
+                value={form.category || ''}
                 onChange={e => setForm({ ...form, category: e.target.value })}
                 required
                 style={{ paddingLeft: '2.5rem' }}
@@ -131,7 +131,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="number"
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="0.00"
-                value={form.price}
+                value={form.price || ''}
                 onChange={e => setForm({ ...form, price: e.target.value })}
                 required
                 min="0"
@@ -144,7 +144,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
             <label className="block font-semibold mb-1 text-slate-700">Status</label>
             <select
               className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
-              value={form.status}
+              value={form.status || 'Active'}
               onChange={e => setForm({ ...form, status: e.target.value })}
             >
               <option value="Active">Active</option>
@@ -176,7 +176,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
             <textarea
               className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
               placeholder="Product description"
-              value={form.description}
+              value={form.description || ''}
               onChange={e => setForm({ ...form, description: e.target.value })}
               rows={2}
             />
@@ -191,7 +191,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="radio"
                 name="imageType"
                 value="file"
-                checked={form.imageType === 'file'}
+                checked={(form.imageType || 'file') === 'file'}
                 onChange={handleImageTypeChange}
               />
               <FaUpload />
@@ -202,7 +202,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="radio"
                 name="imageType"
                 value="url"
-                checked={form.imageType === 'url'}
+                checked={(form.imageType || 'file') === 'url'}
                 onChange={handleImageTypeChange}
               />
               <FaImage />
@@ -243,7 +243,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
               <input
                 type="text"
                 name="imageUrl"
-                value={form.imageUrl}
+                value={form.imageUrl || ''}
                 onChange={e => setForm({ ...form, imageUrl: e.target.value })}
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="https://example.com/image.jpg"
