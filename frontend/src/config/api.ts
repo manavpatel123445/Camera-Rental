@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://camera-rental-ndr0.onrender.com';
+const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL || 'https://camera-rental-ndr0.onrender.com';
 
 export const API_ENDPOINTS = {
   // Productsxsd

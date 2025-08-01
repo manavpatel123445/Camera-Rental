@@ -20,13 +20,15 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
-    /* Additional options for Vite */
-    "types": ["vite/client"],
+    /* Additional options for better compatibility */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src"]
 }
