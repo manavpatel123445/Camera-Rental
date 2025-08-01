@@ -21,6 +21,8 @@ export const getProductById = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
+    console.log('Admin user:', req.user);
+    console.log('Request body:', req.body);
     const { name, category, pricePerDay, description, imageUrl, quantity } = req.body;
     if (!name || !category || !pricePerDay) {
       return res.status(400).json({ message: "Name, category, and pricePerDay are required." });

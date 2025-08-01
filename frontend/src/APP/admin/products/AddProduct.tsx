@@ -92,28 +92,34 @@ const AddProduct = () => {
       if (imageType === 'url' && form.imageUrl) formData.append('imageUrl', form.imageUrl);
       if (form.splineUrl) formData.append('splineUrl', form.splineUrl);
 
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-        setError('No authentication token found. Please log in again.');
-        setLoading(false);
-        return;
-      }
+             const token = localStorage.getItem('adminToken');
+       console.log('Token found:', token ? 'Yes' : 'No');
+       if (!token) {
+         setError('No authentication token found. Please log in again.');
+         setLoading(false);
+         return;
+       }
              const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
          method: 'POST',
          body: formData,
-         headers: { Authorization: `Bearer ${token}` },
+         headers: { 
+           Authorization: `Bearer ${token}`,
+           // Don't set Content-Type for FormData - browser will set it automatically
+         },
        });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess('Product added successfully!');
-        toast.success('Product added successfully!');
-        setTimeout(() => {
-          navigate('/admin/dashboard');
-        }, 2000);
-        return;
-      } else {
-        setError(data.message || 'Failed to add product.');
-      }
+             const data = await res.json();
+       console.log('Response status:', res.status);
+       console.log('Response data:', data);
+       if (res.ok) {
+         setSuccess('Product added successfully!');
+         toast.success('Product added successfully!');
+         setTimeout(() => {
+           navigate('/admin/dashboard');
+         }, 2000);
+         return;
+       } else {
+         setError(data.message || 'Failed to add product.');
+       }
     } catch (err) {
       setError('Network error.');
     } finally {
