@@ -18,19 +18,26 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
-  
-  "https://https://camera-rental-one.vercel.app/"
+  'https://camera-rental-one.vercel.app',
+  'https://camera-rental-git-main-manav-patels-projects-dc745a7f.vercel.app',
+  'https://camera-rental-2khb1l3x6-manav-patels-projects-dc745a7f.vercel.app',
+  'http://localhost:5173'
 ];
 
-
-
 app.use(cors({
-  origin: [
-    'https://camera-rental-one.vercel.app',
-    'https://camera-rental-git-main-manav-patels-projects-dc745a7f.vercel.app',
-    'http://localhost:5173' 
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
 
 // Parse JSON bodies
