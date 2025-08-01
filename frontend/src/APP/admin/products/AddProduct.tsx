@@ -80,31 +80,51 @@ const AddProduct = () => {
         return;
       }
     }
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('name', form.name);
-      formData.append('category', form.category);
-      formData.append('pricePerDay', form.pricePerDay);
-      formData.append('description', form.description);
-      formData.append('quantity', form.quantity);
-      if (imageType === 'file' && form.image) formData.append('image', form.image);
-      if (imageType === 'url' && form.imageUrl) formData.append('imageUrl', form.imageUrl);
-      if (form.splineUrl) formData.append('splineUrl', form.splineUrl);
+         setLoading(true);
+     try {
+       // For testing, let's try JSON first
+       const productData = {
+         name: form.name,
+         category: form.category,
+         pricePerDay: form.pricePerDay,
+         description: form.description,
+         quantity: form.quantity,
+         imageUrl: imageType === 'url' ? form.imageUrl : undefined,
+         splineUrl: form.splineUrl
+       };
+       
+       console.log('Sending product data:', productData);
 
              const token = localStorage.getItem('adminToken');
        console.log('Token found:', token ? 'Yes' : 'No');
+       console.log('Token value:', token);
        if (!token) {
          setError('No authentication token found. Please log in again.');
          setLoading(false);
          return;
        }
+       
+       // Test token first
+       try {
+         const testResponse = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/profile', {
+           headers: { Authorization: `Bearer ${token}` },
+           credentials: 'include',
+         });
+         console.log('Token test response:', testResponse.status);
+         if (testResponse.status === 401) {
+           setError('Token is invalid. Please log in again.');
+           setLoading(false);
+           return;
+         }
+       } catch (err) {
+         console.error('Token test error:', err);
+       }
              const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
          method: 'POST',
-         body: formData,
+         body: JSON.stringify(productData),
          headers: { 
            Authorization: `Bearer ${token}`,
-           // Don't set Content-Type for FormData - browser will set it automatically
+           'Content-Type': 'application/json',
          },
        });
              const data = await res.json();
