@@ -80,8 +80,8 @@ const AddProduct = () => {
         return;
       }
     }
-         setLoading(true);
-     try {
+    setLoading(true);
+    try {
        // For testing, let's try JSON first
        const productData = {
          name: form.name,
@@ -119,27 +119,27 @@ const AddProduct = () => {
        } catch (err) {
          console.error('Token test error:', err);
        }
-             const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
-         method: 'POST',
+      const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
+        method: 'POST',
          body: JSON.stringify(productData),
          headers: { 
            Authorization: `Bearer ${token}`,
            'Content-Type': 'application/json',
          },
-       });
-             const data = await res.json();
+      });
+      const data = await res.json();
        console.log('Response status:', res.status);
        console.log('Response data:', data);
-       if (res.ok) {
-         setSuccess('Product added successfully!');
-         toast.success('Product added successfully!');
-         setTimeout(() => {
-           navigate('/admin/dashboard');
-         }, 2000);
-         return;
-       } else {
-         setError(data.message || 'Failed to add product.');
-       }
+      if (res.ok) {
+        setSuccess('Product added successfully!');
+        toast.success('Product added successfully!');
+        setTimeout(() => {
+          navigate('/admin/dashboard');
+        }, 2000);
+        return;
+      } else {
+        setError(data.message || 'Failed to add product.');
+      }
     } catch (err) {
       setError('Network error.');
     } finally {
@@ -184,18 +184,18 @@ const AddProduct = () => {
                   <label className="block font-semibold mb-2 text-sm">Category<span className="text-red-500">*</span></label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"><FaList /></span>
-                                         <select
-                       name="category"
+                    <select
+                      name="category"
                        value={form.category || ''}
-                       onChange={handleChange}
-                       className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none bg-white"
-                       required
-                     >
+                      onChange={handleChange}
+                      className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none bg-white"
+                      required
+                    >
                        <option value="">Select category</option>
-                       {categoryOptions.map(option => (
-                         <option key={option} value={option}>{option}</option>
-                       ))}
-                     </select>
+                      {categoryOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div>

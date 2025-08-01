@@ -23,27 +23,39 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
   const [form, setForm] = React.useState(initialForm);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Reset form when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setForm(initialForm);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setForm({ ...form, image: e.target.files[0] });
+      setForm(prev => ({ ...prev, image: e.target.files![0] }));
     }
   };
 
   const handleImageTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, imageType: e.target.value as 'file' | 'url', image: null, imageUrl: '' });
+    setForm(prev => ({ 
+      ...prev, 
+      imageType: e.target.value as 'file' | 'url', 
+      image: null, 
+      imageUrl: '' 
+    }));
   };
 
   const handleSave = async () => {
     try {
       const formData = new FormData();
-      formData.append('name', form.name);
-      formData.append('category', form.category);
-      formData.append('pricePerDay', form.price); 
-      formData.append('status', form.status);
-      formData.append('description', form.description);
-      formData.append('quantity', form.quantity);
+      formData.append('name', form.name || '');
+      formData.append('category', form.category || '');
+      formData.append('pricePerDay', form.price || ''); 
+      formData.append('status', form.status || 'Active');
+      formData.append('description', form.description || '');
+      formData.append('quantity', form.quantity || '');
 
       if (form.imageType === 'file' && form.image) {
         formData.append('image', form.image);
@@ -52,11 +64,16 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
         formData.append('imageUrl', form.imageUrl);
       }
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('No authentication token found. Please log in again.');
+        return;
+      }
+      
       const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products', {
         method: 'POST',
         body: formData,
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
@@ -70,6 +87,19 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
     } catch (err) {
       alert('Network error.');
     }
+  };
+
+  // Ensure all form values are defined
+  const safeForm = {
+    name: form.name ?? '',
+    category: form.category ?? '',
+    price: form.price ?? '',
+    status: form.status ?? 'Active',
+    image: form.image,
+    imageUrl: form.imageUrl ?? '',
+    description: form.description ?? '',
+    imageType: form.imageType ?? 'file',
+    quantity: form.quantity ?? '',
   };
 
   return (
@@ -95,8 +125,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="text"
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="Product name"
-                value={form.name || ''}
-                onChange={e => setForm({ ...form, name: e.target.value })}
+                value={safeForm.name}
+                onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
                 required
               />
             </div>
@@ -108,8 +138,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><FaList /></span>
               <select
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm appearance-none"
-                value={form.category || ''}
-                onChange={e => setForm({ ...form, category: e.target.value })}
+                value={safeForm.category}
+                onChange={e => setForm(prev => ({ ...prev, category: e.target.value }))}
                 required
                 style={{ paddingLeft: '2.5rem' }}
               >
@@ -131,8 +161,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="number"
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="0.00"
-                value={form.price || ''}
-                onChange={e => setForm({ ...form, price: e.target.value })}
+                value={safeForm.price}
+                onChange={e => setForm(prev => ({ ...prev, price: e.target.value }))}
                 required
                 min="0"
                 step="0.01"
@@ -144,8 +174,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
             <label className="block font-semibold mb-1 text-slate-700">Status</label>
             <select
               className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
-              value={form.status || 'Active'}
-              onChange={e => setForm({ ...form, status: e.target.value })}
+              value={safeForm.status}
+              onChange={e => setForm(prev => ({ ...prev, status: e.target.value }))}
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -160,8 +190,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="number"
                 className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="Quantity"
-                value={form.quantity || ''}
-                onChange={e => setForm({ ...form, quantity: e.target.value })}
+                value={safeForm.quantity}
+                onChange={e => setForm(prev => ({ ...prev, quantity: e.target.value }))}
                 required
                 min="1"
               />
@@ -176,8 +206,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
             <textarea
               className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
               placeholder="Product description"
-              value={form.description || ''}
-              onChange={e => setForm({ ...form, description: e.target.value })}
+              value={safeForm.description}
+              onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
               rows={2}
             />
           </div>
@@ -191,7 +221,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="radio"
                 name="imageType"
                 value="file"
-                checked={(form.imageType || 'file') === 'file'}
+                checked={safeForm.imageType === 'file'}
                 onChange={handleImageTypeChange}
               />
               <FaUpload />
@@ -202,14 +232,14 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 type="radio"
                 name="imageType"
                 value="url"
-                checked={(form.imageType || 'file') === 'url'}
+                checked={safeForm.imageType === 'url'}
                 onChange={handleImageTypeChange}
               />
               <FaImage />
               Image URL
             </label>
           </div>
-          {form.imageType === 'file' ? (
+          {safeForm.imageType === 'file' ? (
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -217,7 +247,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 className="flex items-center gap-2 bg-slate-500 text-white px-4 py-1 rounded-lg hover:bg-slate-600 focus:outline-none shadow text-sm"
               >
                 <FaUpload />
-                {form.image ? 'Change File' : 'Upload File'}
+                {safeForm.image ? 'Change File' : 'Upload File'}
               </button>
               <input
                 type="file"
@@ -226,12 +256,12 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
                 className="hidden"
                 ref={fileInputRef}
               />
-              {form.image && (
-                <span className="text-xs text-gray-700 truncate max-w-xs">{form.image.name}</span>
+              {safeForm.image && (
+                <span className="text-xs text-gray-700 truncate max-w-xs">{safeForm.image.name}</span>
               )}
-              {form.image && (
+              {safeForm.image && (
                 <img
-                  src={URL.createObjectURL(form.image)}
+                  src={URL.createObjectURL(safeForm.image)}
                   alt="Preview"
                   className="w-12 h-12 object-cover rounded-lg border border-slate-200 ml-2 shadow"
                 />
@@ -243,14 +273,14 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave }) 
               <input
                 type="text"
                 name="imageUrl"
-                value={form.imageUrl || ''}
-                onChange={e => setForm({ ...form, imageUrl: e.target.value })}
+                value={safeForm.imageUrl}
+                onChange={e => setForm(prev => ({ ...prev, imageUrl: e.target.value }))}
                 className="w-full border border-slate-200 rounded-lg px-10 py-2 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition text-sm"
                 placeholder="https://example.com/image.jpg"
               />
-              {form.imageUrl && (
+              {safeForm.imageUrl && (
                 <img
-                  src={form.imageUrl}
+                  src={safeForm.imageUrl}
                   alt="Preview"
                   className="w-12 h-12 object-cover rounded-lg border border-slate-200 ml-2 mt-1 shadow"
                 />
