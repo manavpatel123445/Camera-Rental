@@ -30,15 +30,26 @@ try {
   console.log('🔨 Building backend...');
   execSync('cd backend && npm run build', { stdio: 'inherit' });
 
-  // Step 4: Commit and push changes to GitHub
-  console.log('📝 Committing changes to Git...');
-  execSync('git add .', { stdio: 'inherit' });
-  
-  const commitMessage = `Auto-deploy backend: ${new Date().toISOString()}`;
-  execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
-  
-  console.log('📤 Pushing to GitHub...');
-  execSync('git push origin main', { stdio: 'inherit' });
+  // Step 4: Check if there are changes to commit
+  console.log('📝 Checking for changes to commit...');
+  try {
+    execSync('git add .', { stdio: 'inherit' });
+    
+    // Check if there are any staged changes
+    const status = execSync('git status --porcelain', { encoding: 'utf8' });
+    
+    if (status.trim()) {
+      const commitMessage = `Auto-deploy backend: ${new Date().toISOString()}`;
+      execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
+      
+      console.log('📤 Pushing to GitHub...');
+      execSync('git push origin main', { stdio: 'inherit' });
+    } else {
+      console.log('📝 No changes to commit, skipping Git operations...');
+    }
+  } catch (error) {
+    console.log('⚠️  Git operations failed, but deployment can continue...');
+  }
 
   console.log('✅ Backend deployment triggered!');
   console.log('');
