@@ -136,17 +136,17 @@ const ProductDetail: React.FC = () => {
   };
 
   // Function to reset dates to default values
-  const resetDates = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  // const resetDates = () => {
+  //   const today = new Date().toISOString().split('T')[0];
+  //   const tomorrow = new Date();
+  //   tomorrow.setDate(tomorrow.getDate() + 1);
+  //   const tomorrowStr = tomorrow.toISOString().split('T')[0];
     
-    setPickupDate(today);
-    setDropoffDate(tomorrowStr);
-    localStorage.setItem('pickupDate', today);
-    localStorage.setItem('dropoffDate', tomorrowStr);
-  };
+  //   setPickupDate(today);
+  //   setDropoffDate(tomorrowStr);
+  //   localStorage.setItem('pickupDate', today);
+  //   localStorage.setItem('dropoffDate', tomorrowStr);
+  // };
   // Today's date in yyyy-mm-dd format
   const today = new Date().toISOString().split('T')[0];
 

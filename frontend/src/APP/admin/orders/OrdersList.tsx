@@ -81,7 +81,7 @@ const OrdersList: React.FC = () => {
                 <tr key={order._id}>
                   <td className="px-6 py-4 whitespace-nowrap font-mono text-xs text-slate-700">{order._id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-semibold text-slate-800">{order.user?.username || order.user?._id || 'N/A'}</div>
+                    <div className="font-semibold text-slate-800">{order.user?.username || 'N/A'}</div>
                     <div className="text-xs text-slate-500">{order.user?.email || ''}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

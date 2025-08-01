@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from '../store';
 import type { CartItem } from '../cart/cartSlice';
-import { clearCart, updateQuantity, updateRentalDays } from "../cart/cartSlice";
+import { clearCart } from "../cart/cartSlice";
 import { fetchUserProfile } from "../userAuth/userAuthSlice";
 import { 
   ShoppingCart, 
@@ -15,12 +15,9 @@ import {
   Shield,
   Check,
   ArrowLeft,
-  AlertCircle,
   Edit,
   ChevronRight,
-  UserCheck,
-  Menu,
-  X
+  UserCheck
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CommonNavbar from "../../components/ui/CommonNavbar";
@@ -56,8 +53,8 @@ export default function Checkout() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [formData, setFormData] = useState<CheckoutForm>({
     firstName: "",

@@ -84,8 +84,8 @@ const CameraProducts: React.FC = () => {
   };
 
   // Extract unique brands and subcategories from products
-  const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
-  const subcategories = Array.from(new Set(products.map(p => p.description).filter(Boolean)));
+  // const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
+  // const subcategories = Array.from(new Set(products.map(p => p.description).filter(Boolean)));
   const sortOptions = [
     { value: 'priceLowHigh', label: 'Price: Low to High' },
     { value: 'priceHighLow', label: 'Price: High to Low' },

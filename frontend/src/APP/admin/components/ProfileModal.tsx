@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUserCircle, FaCog, FaSignOutAlt, FaEdit, FaTimes, FaShieldAlt, FaCalendarAlt, FaCamera } from 'react-icons/fa';
+import { FaUserCircle, FaSignOutAlt, FaEdit, FaTimes, FaShieldAlt, FaCamera } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, setAdminUser } from '../../auth/authSlice';
 import toast from 'react-hot-toast';
