@@ -102,8 +102,10 @@ const ProductList = () => {
         
         const data = await res.json();
         if (res.ok) {
-          toast.success('Product deleted successfully!');
-          // Refresh the product list
+                  toast.success('Product deleted successfully!');
+        // Remove the product from the current list immediately
+        setProducts(prevProducts => prevProducts.filter(p => p._id !== id));
+        // Refresh the product list
           window.location.reload();
         } else {
           toast.error(data.message || 'Failed to delete product.');
@@ -115,6 +117,10 @@ const ProductList = () => {
   };
 
   const handleAddProduct = (product: any) => {
+    // Add the new product to the current list
+    setProducts(prevProducts => [product, ...prevProducts]);
+    // Also refresh the list to ensure we have the latest data
+    fetchProducts();
     // Call your API or update state here
     console.log('New product:', product);
   };
@@ -148,7 +154,7 @@ const ProductList = () => {
       if (res.ok) {
         toast.success(`Product ${newStatus === "Active" ? "activated" : "deactivated"}!`);
         // Refresh the product list
-        window.location.reload();
+        fetchProducts();
       } else {
         toast.error('Failed to update status.');
       }
