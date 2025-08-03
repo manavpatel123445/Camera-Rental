@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface User {
   _id: string;
-  name: string;
+  username: string;
   email: string;
   role: string;
   status: string;
@@ -63,7 +63,7 @@ export default function UsersList() {
 
   const filteredUsers = users.filter(
     user =>
-      (user.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+      (user.username?.toLowerCase() || '').includes(search.toLowerCase()) ||
       (user.email?.toLowerCase() || '').includes(search.toLowerCase())
   );
 
@@ -149,7 +149,7 @@ export default function UsersList() {
               <tbody className="bg-white divide-y divide-slate-100">
                 {filteredUsers.map((user, idx) => (
                   <tr key={user._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">{user.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">{user.username}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-700">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap capitalize text-slate-700">{user.role || 'user'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -198,7 +198,7 @@ export default function UsersList() {
               </button>
               <h2 className="text-2xl font-bold mb-4 text-slate-800">User Details</h2>
               <div className="space-y-2 text-slate-700">
-                <div><strong>Name:</strong> {selectedUser.name}</div>
+                <div><strong>Name:</strong> {selectedUser.username}</div>
                 <div><strong>Email:</strong> {selectedUser.email}</div>
                 <div><strong>Role:</strong> {selectedUser.role || 'user'}</div>
                 <div><strong>Status:</strong> <span className={`px-2 py-1 rounded text-xs font-bold ${((selectedUser.status || 'active') === 'active') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{selectedUser.status || 'active'}</span></div>
