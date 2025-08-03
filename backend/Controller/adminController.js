@@ -300,9 +300,9 @@ export const deleteProfileImage = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    // Fetch admin users from Admin collection, not regular users
-    const admins = await Admin.find().select('-password');
-    res.json(admins);
+    // Fetch regular users from User collection
+    const users = await User.find().select('-password');
+    res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Server error.", error: err.message });
   }
