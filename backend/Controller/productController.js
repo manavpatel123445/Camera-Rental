@@ -47,8 +47,11 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
+    console.log('Update Product Request:', { body: req.body, file: req.file, headers: req.headers });
     const updateFields = {};
     const { name, category, pricePerDay, description, imageUrl, quantity } = req.body;
+
+    console.log('Image URL from request:', imageUrl);
 
     if (name !== undefined) updateFields.name = name;
     if (category !== undefined) updateFields.category = category;
@@ -57,8 +60,10 @@ export const updateProduct = async (req, res) => {
     if (quantity !== undefined) updateFields.quantity = quantity;
 
     if (req.file) {
+      console.log('Using uploaded file for image');
       updateFields.image = req.file.buffer;
     } else if (imageUrl !== undefined) {
+      console.log('Using image URL:', imageUrl);
       updateFields.image = imageUrl;
     }
 
@@ -95,4 +100,4 @@ export const getProductStats = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error.', error: err.message });
   }
-}; 
+};

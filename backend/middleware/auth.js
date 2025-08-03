@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://https://camera-rental-one.vercel.app/' // Replace with your actual Vercel URL
+  'https://camera-rental-one.vercel.app' // Corrected Vercel URL
 ];
 
 const auth = (req, res, next) => {

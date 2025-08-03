@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaUpload, FaTag, FaList, FaDollarSign, FaAlignLeft, FaImage, FaTimes } from 'react-icons/fa';
+import { getAuthHeadersForFormData, handleAuthError } from '../../../utils/adminAuth';
+import { useNavigate } from 'react-router-dom';
 
 const UpdateProductModal = ({ isOpen, onClose, product, onUpdated }: any) => {
   const [form, setForm] = useState<any>({ ...product, image: null, imageType: product?.imageUrl ? 'url' : 'file', imageUrl: product?.imageUrl || '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
   useEffect(() => {
     setForm({ ...product, image: null, imageType: product?.imageUrl ? 'url' : 'file', imageUrl: product?.imageUrl || '' });
   }, [product]);
@@ -30,23 +33,73 @@ const UpdateProductModal = ({ isOpen, onClose, product, onUpdated }: any) => {
       formData.append('description', form.description);
       formData.append('quantity', form.quantity || '1');
       formData.append('status', form.status || 'Active');
-      if (form.imageType === 'file' && form.image) formData.append('image', form.image);
-      if (form.imageType === 'url' && form.imageUrl) formData.append('imageUrl', form.imageUrl);
-      const token = localStorage.getItem('token');
+      
+      console.log('Image type:', form.imageType);
+      if (form.imageType === 'file' && form.image) {
+        console.log('Appending image file to FormData');
+        formData.append('image', form.image);
+      }
+      if (form.imageType === 'url' && form.imageUrl) {
+        console.log('Appending image URL to FormData:', form.imageUrl);
+        formData.append('imageUrl', form.imageUrl);
+      }
+      
+      const apiUrl = `https://camera-rental-ndr0.onrender.com/api/products/${product._id}`;
+      console.log('Sending PATCH request to update product:', apiUrl);
+      
+      // Use the utility function to get proper auth headers for FormData
+      let headers;
+      try {
+        headers = getAuthHeadersForFormData();
+      } catch (err) {
+        // Handle authentication token errors
+        handleAuthError(err, navigate);
+        return;
+      }
+      
       const res = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${product._id}`, {
         method: 'PATCH',
         body: formData,
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: headers,
+        credentials: 'include'
       });
-      const data = await res.json();
-      if (res.ok) {
-        onUpdated();
-        onClose();
-      } else {
-        alert(data.message || 'Failed to update product.');
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Update failed:', res.status, errorText);
+        
+        // Check for authentication errors
+        if (res.status === 401 || res.status === 403) {
+          handleAuthError({ status: res.status }, navigate);
+          return;
+        }
+        
+        try {
+          const data = JSON.parse(errorText);
+          alert(data.message || 'Failed to update product.');
+        } catch (e) {
+          alert(`Failed to update product. Status: ${res.status}`);
+        }
+        return;
       }
-    } catch (err) {
-      alert('Network error.');
+      
+      const data = await res.json();
+      console.log('Update successful:', data);
+      onUpdated();
+      onClose();
+    } catch (err: any) {
+      console.error('Network error during update:', err);
+      
+      // Check if it's an authentication error
+      if (err.message?.includes('No authentication token found') || 
+          err.message?.includes('token') || 
+          err.status === 401 || 
+          err.status === 403) {
+        handleAuthError(err, navigate);
+        return;
+      }
+      
+      alert('Network error during update. Check console for details.');
     }
   };
   return (
@@ -239,4 +292,4 @@ const UpdateProductModal = ({ isOpen, onClose, product, onUpdated }: any) => {
   );
 };
 
-export default UpdateProductModal; 
+export default UpdateProductModal;
