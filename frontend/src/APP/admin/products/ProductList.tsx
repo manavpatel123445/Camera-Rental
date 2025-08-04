@@ -190,7 +190,7 @@ const ProductList = () => {
               onChange={e => setSearch(e.target.value)}
             />
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded"
+              className="bg-white text-black border border-slate-300 px-4 py-2 rounded"
               onClick={() => setIsModalOpen(true)}
             >
               Add product

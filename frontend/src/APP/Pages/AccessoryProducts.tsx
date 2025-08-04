@@ -8,6 +8,7 @@ import CartModal from '../../components/ui/CartModal';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../../components/ui/Footer';
 
 interface Product {
   _id: string;
@@ -214,6 +215,7 @@ const AccessoryProducts: React.FC = () => {
         onUpdateQuantity={() => {}}
         
       />
+      <Footer/>
     </div>
   );
 };

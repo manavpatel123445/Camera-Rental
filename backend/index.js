@@ -64,6 +64,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Remove or update Permissions-Policy header to avoid browser warnings
+app.use((req, res, next) => {
+  // Only set supported features, or remove the header entirely if not needed
+  // res.setHeader('Permissions-Policy', 'geolocation=(), microphone=()'); // Example of supported features
+  // Or, to remove the header entirely, do nothing here
+  next();
+});
+
 // Parse JSON bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
