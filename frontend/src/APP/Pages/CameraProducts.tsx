@@ -250,6 +250,6 @@ const CameraProducts: React.FC = () => {
       <Footer />
     </div>
   );
-};
+}; 
 
 export default CameraProducts; 

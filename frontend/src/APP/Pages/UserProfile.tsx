@@ -5,7 +5,7 @@ import type { AppDispatch } from '../store';
 import { logout, fetchUserProfile,  setUser } from '../userAuth/userAuthSlice';
 import { FaUserCircle, FaCamera, FaBell, FaMapMarkerAlt, FaHeart, FaCreditCard, FaEdit, FaTimes, FaSave } from 'react-icons/fa';
 import { Button } from '../../components/ui/Button';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import CommonNavbar from '../../components/ui/CommonNavbar';
 import toast from 'react-hot-toast';
 
@@ -14,6 +14,11 @@ const UserProfile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   // Example stats (replace with real data)
   const stats = [
@@ -41,8 +46,12 @@ const UserProfile: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   useEffect(() => {
-    dispatch(fetchUserProfile());
-  }, [dispatch]);
+    // Only fetch profile if user exists and has a valid token
+    const token = localStorage.getItem('token');
+    if (user && token) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, user]);
 
   useEffect(() => {
     if (user) {
@@ -138,21 +147,6 @@ const UserProfile: React.FC = () => {
       // Optionally show error
     }
   };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col bg-[#181622] text-white">
-        <CommonNavbar />
-        <div className="flex flex-1 items-center justify-center">
-          <div className="bg-[#232136] p-8 rounded-xl shadow-lg w-full max-w-md text-center">
-            <FaUserCircle className="mx-auto mb-4 text-6xl text-purple-400" />
-            <h2 className="text-2xl font-bold mb-4">You are not logged in</h2>
-            <Button onClick={() => navigate('/login')} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg">Login</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#181622] text-white">

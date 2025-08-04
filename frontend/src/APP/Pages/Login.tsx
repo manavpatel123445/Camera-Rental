@@ -29,12 +29,11 @@ const Login: React.FC = () => {
       const data = await res.json();
       console.log('LOGIN RESPONSE:', data); // Debug: log the backend response
       if (res.ok && data.token) {
-        dispatch(setUser({
-          username: data.username || '',
-          email: data.email,
-          token: data.token,
-        }));
-        localStorage.setItem('token', data.token); 
+        console.log('LOGIN TOKEN:', data.token); // Debug: log the token received
+        const userObj = { ...data, token: data.token };
+        dispatch(setUser(userObj));
+        localStorage.setItem('user', JSON.stringify(userObj));
+        localStorage.setItem('token', data.token);
         toast.success('Logged in successfully!');
         setTimeout(() => {
           window.location.href = '/';

@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import AdminLogin from './APP/admin/auth/AdminLogin';
 import AdminRegister from './APP/admin/auth/AdminRegister';
 import ProtectedRoute from './APP/admin/components/ProtectedRoute';
+import UserProtectedRoute from './APP/components/UserProtectedRoute';
 import Dashboard from './APP/admin/dashboard/Dashboard';
 import ForgotPassword from './APP/admin/auth/ForgotPassword';
 import ResetPassword from './APP/admin/auth/ResetPassword';
@@ -93,7 +94,11 @@ function App() {
       <Route path="/lenses" element={<LensProducts />} />
       <Route path="/accessories" element={<AccessoryProducts />} />
       <Route path="/checkout" element={<Checkout />} />
-      <Route path="/profile" element={<UserProfile />} />
+      <Route path="/profile" element={
+        <UserProtectedRoute>
+          <UserProfile />
+        </UserProtectedRoute>
+      } />
       <Route path="/orders" element={<UserOrders />} />
       <Route path="/support" element={<Support />} />
      

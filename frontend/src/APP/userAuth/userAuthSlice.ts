@@ -53,15 +53,15 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as { userAuth: UserAuthState };
-      const token = state.userAuth.user?.token;
+      const token = state.userAuth.user?.token || localStorage.getItem('token');
+      console.log('FETCH PROFILE TOKEN:', token); // Debug: log the token being sent
       const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
-        return rejectWithValue('Unauthorized');
+        return rejectWithValue({ error: 'Unauthorized', statusCode: 401 });
       }
       if (!res.ok) throw new Error('Failed to fetch profile');
       return await res.json();
@@ -99,6 +99,7 @@ const userAuthSlice = createSlice({
   reducers: {
     setUser(state, action: PayloadAction<User>) {
       state.user = action.payload;
+      // Persist user and token to localStorage
       localStorage.setItem('user', JSON.stringify(action.payload));
       if (action.payload.token) {
         localStorage.setItem('token', action.payload.token);
@@ -115,6 +116,12 @@ const userAuthSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action: PayloadAction<User>) => {
         state.user = action.payload;
         localStorage.setItem('user', JSON.stringify(action.payload));
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        // Clear user state when authentication fails
+        if (action.payload && typeof action.payload === 'object' && 'statusCode' in action.payload && action.payload.statusCode === 401) {
+          state.user = null;
+        }
       })
       .addCase(updateUserProfile.fulfilled, (state, action: PayloadAction<User>) => {
         state.user = action.payload;

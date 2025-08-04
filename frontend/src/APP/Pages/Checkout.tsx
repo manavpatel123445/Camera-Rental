@@ -6,12 +6,12 @@ import type { RootState } from '../store';
 import type { CartItem } from '../cart/cartSlice';
 import { clearCart } from "../cart/cartSlice";
 import { fetchUserProfile } from "../userAuth/userAuthSlice";
-import { 
-  ShoppingCart, 
-  CreditCard, 
-  Calendar, 
-  User, 
-  MapPin, 
+import {
+  ShoppingCart,
+  CreditCard,
+  Calendar,
+  User,
+  MapPin,
   Shield,
   Check,
   ArrowLeft,
@@ -53,8 +53,6 @@ export default function Checkout() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [formData, setFormData] = useState<CheckoutForm>({
     firstName: "",
@@ -81,10 +79,12 @@ export default function Checkout() {
 
   // Fetch user profile on component mount
   useEffect(() => {
-    if (user?.token) {
+    // Only fetch profile if user exists and has a valid token
+    const token = localStorage.getItem('token');
+    if (user && user.token && token) {
       dispatch(fetchUserProfile() as any);
     }
-  }, [dispatch, user?.token]);
+  }, [dispatch, user]);
 
   // Auto-fill form with user profile data when available
   useEffect(() => {
@@ -125,6 +125,67 @@ export default function Checkout() {
       }));
     }
   };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    let newValue = value;
+
+    // Only allow letters and spaces for cardholderName
+    if (name === 'cardholderName') {
+      newValue = value.replace(/[^a-zA-Z\s]/g, '');
+    }
+
+    // Format card number: 12 digits, dash after every 4 digits
+    if (name === 'cardNumber') {
+      // Remove all non-digit characters
+      newValue = value.replace(/\D/g, '');
+      // Limit to 12 digits
+      newValue = newValue.slice(0, 12);
+      // Add dash after every 4 digits
+      newValue = newValue.replace(/(.{4})/g, '$1-').replace(/-$/, '');
+    }
+
+    // Format expiryDate as MM/YY
+    if (name === 'expiryDate') {
+      // Remove all non-digits, then format as MM/YY
+      let raw = value.replace(/[^0-9]/g, '');
+      if (raw.length > 4) raw = raw.slice(0, 4);
+      let formatted = raw;
+      if (raw.length > 2) {
+        formatted = raw.slice(0, 2) + '/' + raw.slice(2);
+      }
+    
+      // Allow empty, 1, 2, 3, 4, or 5 chars for smooth typing
+      if (formatted === '' || formatted.length <= 5) {
+        // Validate month if 2+ chars
+        const [mm, yy] = formatted.split('/');
+        let valid = true;
+        const now = new Date();
+        const currentYear = now.getFullYear() % 100; // last two digits
+        const currentMonth = now.getMonth() + 1; // 1-12
+    
+        if (mm && mm.length === 2 && !/^(0[1-9]|1[0-2])$/.test(mm)) valid = false;
+        if (yy && yy.length === 2) {
+          const yearNum = parseInt(yy, 10);
+          if (yearNum > 40) valid = false;
+          if (yearNum < currentYear) valid = false;
+          if (yearNum === currentYear && mm && mm.length === 2 && parseInt(mm, 10) < currentMonth) valid = false;
+        }
+    
+        if (!valid) return; // Don't update if invalid
+    
+        newValue = formatted;
+      } else {
+        return; // Don't update if too long
+      }
+    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked :
+        name === 'phone' || name === 'zipCode' || name === 'cvv'
+          ? parseInt(newValue) || 0
+          : newValue
+    }));
+  };
 
   // Redirect to cart if empty
   if (cart.length === 0 && !orderComplete) {
@@ -160,15 +221,6 @@ export default function Checkout() {
     );
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
-               name === 'phone' || name === 'zipCode' || name === 'cardNumber' || name === 'cvv' ? 
-               parseInt(value) || 0 : value
-    }));
-  };
 
   const handleSubmitOrder = async () => {
     setIsProcessing(true);
@@ -201,7 +253,7 @@ export default function Checkout() {
     setIsProcessing(false);
     setOrderComplete(true);
     dispatch(clearCart());
-    
+
     // Clear the dates from localStorage after successful order completion only
     // This ensures dates persist for future rentals until order is completed
     localStorage.removeItem('pickupDate');
@@ -249,7 +301,7 @@ export default function Checkout() {
                   Continue Shopping
                 </Button>
               </Link>
-              <Button 
+              <Button
                 className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
                 onClick={() => navigate('/orders')}
               >
@@ -276,8 +328,8 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-[#181622]">
       {/* Header */}
-      <CommonNavbar/>
-      
+      <CommonNavbar />
+
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="flex text-sm text-gray-400 overflow-x-auto">
@@ -292,7 +344,7 @@ export default function Checkout() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-16">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Checkout</h1>
-          
+
           {/* Progress Steps - Mobile Responsive */}
           <div className="mb-6 sm:mb-8">
             {/* Desktop Steps */}
@@ -303,34 +355,31 @@ export default function Checkout() {
                 const isCompleted = currentStep > step.id;
                 return (
                   <div key={step.id} className="flex items-center">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                      isCompleted 
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${isCompleted
                         ? 'bg-purple-600 border-purple-600 text-white'
-                        : isActive 
+                        : isActive
                           ? 'border-purple-600 text-purple-400'
                           : 'border-slate-600 text-gray-400'
-                    }`}>
+                      }`}>
                       {isCompleted ? (
                         <Check className="h-5 w-5" />
                       ) : (
                         <Icon className="h-5 w-5" />
                       )}
                     </div>
-                    <span className={`ml-2 text-sm font-medium ${
-                      isActive ? 'text-white' : 'text-gray-400'
-                    }`}>
+                    <span className={`ml-2 text-sm font-medium ${isActive ? 'text-white' : 'text-gray-400'
+                      }`}>
                       {step.name}
                     </span>
                     {index < steps.length - 1 && (
-                      <ChevronRight className={`ml-4 h-4 w-4 ${
-                        isCompleted ? 'text-purple-600' : 'text-slate-600'
-                      }`} />
+                      <ChevronRight className={`ml-4 h-4 w-4 ${isCompleted ? 'text-purple-600' : 'text-slate-600'
+                        }`} />
                     )}
                   </div>
                 );
               })}
             </div>
-            
+
             {/* Mobile Steps */}
             <div className="md:hidden">
               <div className="flex justify-between items-center mb-4">
@@ -338,7 +387,7 @@ export default function Checkout() {
                 <span className="text-sm text-white font-medium">{steps[currentStep - 1].name}</span>
               </div>
               <div className="w-full bg-slate-700 rounded-full h-2">
-                <div 
+                <div
                   className="bg-purple-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${(currentStep / steps.length) * 100}%` }}
                 ></div>
@@ -582,7 +631,7 @@ export default function Checkout() {
                   </div>
 
                   <div className="pt-3 sm:pt-4">
-                    <Button 
+                    <Button
                       onClick={() => setCurrentStep(2)}
                       disabled={!canProceedToStep2}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
@@ -686,14 +735,14 @@ export default function Checkout() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => setCurrentStep(1)}
                       className="border-slate-600 text-gray-300 hover:bg-slate-700 text-sm sm:text-base"
                     >
                       Back
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => setCurrentStep(3)}
                       disabled={!canProceedToStep3}
                       className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
@@ -733,15 +782,15 @@ export default function Checkout() {
                       Card Number *
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       name="cardNumber"
                       required
-                      placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber || ''}
+                      placeholder="1234-5678-9012"
+                      value={formData.cardNumber}
                       onChange={handleInputChange}
+                      maxLength={14} // 12 digits + 2 dashes
                       className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
-                    />
-                  </div>
+                    />                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -754,8 +803,12 @@ export default function Checkout() {
                         placeholder="MM/YY"
                         value={formData.expiryDate}
                         onChange={handleInputChange}
+                        maxLength={5}
                         className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
+                      {formData.expiryDate && (
+                        <div className="text-xs text-gray-400 mt-1">Selected: {formData.expiryDate}</div>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -768,6 +821,7 @@ export default function Checkout() {
                         placeholder="123"
                         value={formData.cvv || ''}
                         onChange={handleInputChange}
+                        maxLength={3}
                         className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
                       />
                     </div>
@@ -784,7 +838,7 @@ export default function Checkout() {
                       />
                       <span className="text-gray-300 text-sm">Add equipment insurance (10% of rental cost)</span>
                     </label>
-                    
+
                     <label className="flex items-start space-x-3">
                       <input
                         type="checkbox"
@@ -798,14 +852,14 @@ export default function Checkout() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => setCurrentStep(2)}
                       className="border-slate-600 text-gray-300 hover:bg-slate-700 text-sm sm:text-base"
                     >
                       Back
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => setCurrentStep(4)}
                       disabled={!canProceedToStep4}
                       className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
@@ -853,14 +907,14 @@ export default function Checkout() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => setCurrentStep(3)}
                       className="border-slate-600 text-gray-300 hover:bg-slate-700 text-sm sm:text-base"
                     >
                       Back
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleSubmitOrder}
                       disabled={isProcessing}
                       className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
