@@ -239,14 +239,7 @@ const CameraProducts: React.FC = () => {
           🛒
         </button>
       )}
-      <CartModal
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cart={cart}
-        onRemove={handleRemoveFromCart}
-        total={cartTotal}
-        onUpdateQuantity={handleUpdateQuantity}
-      />
+      
       <Footer />
     </div>
   );

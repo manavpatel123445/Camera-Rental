@@ -3,7 +3,7 @@ import { Button } from './components/ui/Button';
 import toast from 'react-hot-toast';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from './APP/store';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CartModal from './components/ui/CartModal';
 import CommonNavbar from './components/ui/CommonNavbar';
 import { addToCart, removeFromCart, updateQuantity } from './APP/cart/cartSlice';
@@ -77,7 +77,7 @@ const Home: React.FC = () => {
         <div className="flex-1 flex flex-col items-center md:items-start gap-6 text-center md:text-left w-full">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-2">Capture Your Vision<br />with <span className="text-purple-400">Premium Gear</span></h1>
           <p className="text-base sm:text-lg md:text-lg text-gray-300 mb-4">Rent top-tier cameras and equipment for your next project. Unleash your creativity with our curated selection.</p>
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg text-base md:text-lg w-full sm:w-auto">Rent the Best Cameras Today</Button>
+          <Link to='/cameras'> <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg text-base md:text-lg w-full sm:w-auto">Rent the Best Cameras Today</Button></Link>
         </div>
       </section>
 

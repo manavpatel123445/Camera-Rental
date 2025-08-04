@@ -162,7 +162,7 @@ const LensProducts: React.FC = () => {
             <div className="text-center text-gray-400">No lenses found.</div>
           ) : (
             viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">Home
                 {filteredProducts.slice(0, 8).map((product: any) => (
                   <div key={product._id} className="bg-[#1E293B] rounded-2xl shadow p-6 flex flex-col items-start">
                     <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-white flex items-center justify-center cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
@@ -227,15 +227,7 @@ const LensProducts: React.FC = () => {
           🛒
         </button>
       )}
-      <CartModal
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cart={cart}
-        onRemove={() => {}}
-        total={cartTotal}
-        onUpdateQuantity={() => {}}
-       
-      />
+      
       <Footer/>
     </div>
   );
