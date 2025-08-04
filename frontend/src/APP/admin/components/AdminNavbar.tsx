@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { FaBars, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+// @ts-ignore
 import logo from '../../../logo.png';
 import ProfileModal from './ProfileModal';
 import { useDispatch } from 'react-redux';

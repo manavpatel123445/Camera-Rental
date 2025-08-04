@@ -196,6 +196,39 @@ const AccessoryProducts: React.FC = () => {
             )
           )}
         </main>
+        {/* Lighting Products Section */}
+        {lighting.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6">Lighting Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {lighting.map((product: any) => (
+                <div key={product._id} className="bg-[#1E293B] rounded-2xl shadow p-6 flex flex-col items-start">
+                  <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-white flex items-center justify-center cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
+                    <img
+                      src={product.image?.startsWith('http') ? product.image : `https://camera-rental-ndr0.onrender.com/${product.image}`}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 mb-2 w-full">
+                    <h3 className="text-lg font-bold flex-1 text-white truncate" title={product.name}>{product.name}</h3>
+                    <span className="px-3 py-1 rounded-full bg-purple-400 text-purple-700 text-xs font-semibold capitalize">
+                      {product.category}
+                    </span>
+                  </div>
+                  <div className="text-gray-500 text-sm mb-4 truncate max-w-full" title={product.description}>{product.description}</div>
+                  <div className="flex items-center justify-between w-full mb-4">
+                    <span className="text-2xl font-bold text-white">${product.pricePerDay}</span>
+                    <span className="text-gray-400 text-xs">/day</span>
+                  </div>
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg w-full" onClick={() => handleAddToCart(product)}>
+                    Add to Cart
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       {showCartButton && (
         <button
