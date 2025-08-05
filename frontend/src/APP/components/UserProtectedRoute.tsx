@@ -19,6 +19,13 @@ export default function UserProtectedRoute({ children }: { children: React.React
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     }
+    // Check if we have a valid user object in localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && !user) {
+      // If there's a user in localStorage but not in Redux, clear localStorage
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    }
   }, [user, token, dispatch]);
   
   if (!user || !token) {

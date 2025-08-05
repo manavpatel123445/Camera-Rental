@@ -25,7 +25,8 @@ const Register: React.FC = () => {
       const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
+        body: JSON.stringify({ username, email, password }),
+        credentials: 'include'
       });
       const data = await res.json();
       if (res.ok) {
@@ -131,4 +132,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register; 
+export default Register;

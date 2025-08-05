@@ -11,7 +11,8 @@ import ResetPassword from './APP/admin/auth/ResetPassword';
 import ChangePassword from './APP/admin/auth/ChangePassword';
 import AdminProfile from './APP/admin/auth/AdminProfile';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from './APP/userAuth/userAuthSlice';
 import { fetchAdminProfile } from './APP/auth/authSlice';
 import ProductList from './APP/admin/products/ProductList';
 import AddProduct from './APP/admin/products/AddProduct';
@@ -33,9 +34,30 @@ import Support from './APP/Pages/Support';
 
 function App() {
   const dispatch = useDispatch<any>();
+  const user = useSelector((state: any) => state.userAuth?.user);
+  
   useEffect(() => {
     dispatch(fetchAdminProfile() as any);
-  }, [dispatch]);
+    
+    // Check for token-user consistency on app load
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    // If no token but user in Redux, logout
+    if (!token && user) {
+      dispatch(logout());
+    }
+    
+    // If no token but user in localStorage, clear localStorage
+    if (!token && storedUser) {
+      localStorage.removeItem('user');
+    }
+    
+    // If token but no user in localStorage or Redux, clear token
+    if (token && (!storedUser || !user)) {
+      localStorage.removeItem('token');
+    }
+  }, [dispatch, user]);
   return (
   
       <Routes>

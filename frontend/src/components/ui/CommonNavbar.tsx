@@ -57,15 +57,14 @@ const CommonNavbar: React.FC<CommonNavbarProps> = ({
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    // First dispatch the logout action which will handle localStorage cleanup
+    dispatch(userLogout());
+    // Then clear cart data
     localStorage.removeItem('cart');
     dispatch(clearCart());
-    dispatch(userLogout());
     setIsLoggedIn(false);
     toast.success('Logged out successfully!');
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 500);
+    // The redirect is now handled in the userLogout action
   };
 
   const handleRemoveFromCart = (id: string) => {

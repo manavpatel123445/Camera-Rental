@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../store';
 import type { AppDispatch } from '../store';
-import { logout, fetchUserProfile,  setUser } from '../userAuth/userAuthSlice';
+import { logout, fetchUserProfile, setUser, updateUserProfile, type User, type Address } from '../userAuth/userAuthSlice';
 import { FaUserCircle, FaCamera, FaBell, FaMapMarkerAlt, FaHeart, FaCreditCard, FaEdit, FaTimes, FaSave } from 'react-icons/fa';
 import { Button } from '../../components/ui/Button';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
@@ -13,6 +15,13 @@ const UserProfile: React.FC = () => {
   const user = useSelector((state: RootState) => state.userAuth.user);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  
+  // Redirect if no user is found
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
   const location = useLocation();
 
   // Redirect to login if not authenticated
@@ -29,19 +38,42 @@ const UserProfile: React.FC = () => {
 
   const [editMode, setEditMode] = useState(false);
   const [tab, setTab] = useState('profile');
+  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     name: user?.username || '',
     email: user?.email || '',
-    contact: '',
-    description: '',
+    contact: user?.contact || '',
+    description: user?.description || '',
   });
   const [address, setAddress] = useState({
-    street: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: '',
+    street: user?.address?.street || '',
+    city: user?.address?.city || '',
+    state: user?.address?.state || '',
+    zip: user?.address?.zip || '',
+    country: user?.address?.country || '',
   });
+  
+  // Update form and address when user data changes
+  useEffect(() => {
+    if (user) {
+      setForm({
+        name: user.username || '',
+        email: user.email || '',
+        contact: user.contact || '',
+        description: user.description || '',
+      });
+      
+      if (user.address) {
+        setAddress({
+          street: user.address.street || '',
+          city: user.address.city || '',
+          state: user.address.state || '',
+          zip: user.address.zip || '',
+          country: user.address.country || '',
+        });
+      }
+    }
+  }, [user]);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
@@ -92,9 +124,20 @@ const UserProfile: React.FC = () => {
       return;
     }
     if (!user) return;
+    
+    setIsLoading(true);
     const formData = new FormData();
     formData.append('avatar', file);
     const token = user?.token || localStorage.getItem('token');
+    
+    if (!token) {
+      toast.error('Authentication token missing. Please log in again.');
+      setIsLoading(false);
+      return;
+    }
+    
+    const toastId = toast.loading('Uploading profile image...');
+    
     try {
       const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile/avatar', {
         method: 'PUT',
@@ -102,7 +145,11 @@ const UserProfile: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
         body: formData,
+        credentials: 'include'
       });
+      
+      toast.dismiss(toastId);
+      
       if (res.ok) {
         const data = await res.json();
         const avatarUrl = data.avatar.startsWith('http')
@@ -116,35 +163,130 @@ const UserProfile: React.FC = () => {
         toast.error(data.message || 'Failed to upload image');
       }
     } catch (err) {
+      toast.dismiss(toastId);
       toast.error('Failed to upload image');
+      console.error('Avatar upload error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
-    const profileData: any = {
-      username: form.name,
-      email: form.email,
-      contact: form.contact,
-      description: form.description,
-      address,
-    };
-    // Do NOT send avatar here
-    const token = user?.token || localStorage.getItem('token');
-    if (!token) return;
-    const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(profileData),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      dispatch(setUser(data));
-      setEditMode(false);
-    } else {
-      // Optionally show error
+    if (isLoading) return; // Prevent multiple submissions
+    
+    try {
+      setIsLoading(true);
+      
+      console.log('Current form state:', form); // Debug: log form state
+      console.log('Current address state:', address); // Debug: log address state
+      console.log('Current user state:', user); // Debug: log user state
+      
+      // Create a partial User object for the update
+      const profileData: Partial<User> = {
+        username: form.name.trim(),
+        email: form.email.trim()
+      };
+      
+      // Only add non-empty fields
+      if (form.contact?.trim()) {
+        profileData.contact = form.contact.trim();
+      }
+      
+      if (form.description?.trim()) {
+        profileData.description = form.description.trim();
+      }
+      
+      // Only include address if at least one field is filled
+      const hasAddressData = Object.values(address).some(value => value?.trim?.());
+      if (hasAddressData) {
+        const addressData: Address = {
+          street: address.street?.trim() || '',
+          city: address.city?.trim() || '',
+          state: address.state?.trim() || '',
+          zip: address.zip?.trim() || '',
+          country: address.country?.trim() || ''
+        };
+        profileData.address = addressData;
+      }
+      
+      console.log('Profile data being sent:', profileData); // Debug: log profile data
+      
+      const toastId = toast.loading('Saving profile changes...');
+      
+      // Use the Redux thunk instead of direct fetch
+      console.log('Dispatching updateUserProfile action...'); // Debug: log before dispatch
+      const resultAction = await dispatch(updateUserProfile(profileData));
+      console.log('Update profile result action:', resultAction); // Debug: log result action
+      
+      toast.dismiss(toastId);
+      
+      if (updateUserProfile.fulfilled.match(resultAction)) {
+        // Success case
+        console.log('Profile update successful!'); // Debug: log success
+        setEditMode(false);
+        toast.success('Profile updated successfully!');
+      } else {
+        // Error case
+        console.error('Profile update failed:', resultAction); // Debug: log failure details
+        console.error('Result action payload:', resultAction.payload); // Debug: log payload
+        
+        // Try direct fetch as fallback
+        console.log('Trying direct fetch as fallback...');
+        try {
+          const token = user?.token || localStorage.getItem('token');
+          if (!token) {
+            throw new Error('Authentication token missing');
+          }
+          
+          const fallbackToastId = toast.loading('Retrying profile update...');
+          
+          const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(profileData),
+            credentials: 'include'
+          });
+          
+          console.log('Fallback response status:', res.status);
+          
+          if (res.ok) {
+            const data = await res.json();
+            console.log('Fallback success response:', data);
+            dispatch(setUser({ ...data, token })); // Make sure to preserve token
+            setEditMode(false);
+            toast.dismiss(fallbackToastId);
+            toast.success('Profile updated successfully!');
+            return; // Exit early on success
+          } else {
+            const errorText = await res.text();
+            console.error('Fallback error response:', errorText);
+            toast.dismiss(fallbackToastId);
+            throw new Error('Fallback request failed');
+          }
+        } catch (fallbackError) {
+          console.error('Fallback request error:', fallbackError);
+          // Continue to show original error
+        }
+        
+        // Show original error if fallback also failed
+        const errorMessage = typeof resultAction.payload === 'string' 
+          ? resultAction.payload 
+          : (resultAction.payload && typeof resultAction.payload === 'object' && 'error' in resultAction.payload)
+            ? resultAction.payload.error
+            : 'Failed to update profile';
+            
+        console.error('Error message to display:', errorMessage); // Debug: log error message
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error('An error occurred while updating your profile');
+      console.error('Profile update exception:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -177,6 +319,7 @@ const UserProfile: React.FC = () => {
                   accept="image/*"
                   id="avatar-upload"
                   className="hidden"
+                  disabled={isLoading}
                   onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) {
@@ -186,8 +329,11 @@ const UserProfile: React.FC = () => {
                     }
                   }}
                 />
-                <label htmlFor="avatar-upload" className="absolute bottom-4 right-4 bg-purple-400 text-white rounded-full p-2 border-4 border-[#232136] hover:bg-purple-500 transition cursor-pointer">
-                  <FaCamera />
+                <label 
+                  htmlFor={isLoading ? '' : 'avatar-upload'} 
+                  className={`absolute bottom-4 right-4 ${isLoading ? 'bg-gray-400' : 'bg-purple-400 hover:bg-purple-500'} text-white rounded-full p-2 border-4 border-[#232136] transition ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  {isLoading ? '...' : <FaCamera />}
                 </label>
               </div>
               <div className="text-center">
@@ -216,10 +362,19 @@ const UserProfile: React.FC = () => {
                   </Button>
                 ) : (
                   <div className="flex gap-2">
-                    <Button className="bg-purple-400 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2" onClick={handleSave}>
-                      <FaSave /> Save
+                    <Button 
+                      className="bg-purple-400 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2" 
+                      onClick={handleSave}
+                      type="button"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Saving...' : <><FaSave /> Save</>}
                     </Button>
-                    <Button className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2" onClick={() => setEditMode(false)}>
+                    <Button 
+                      className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2" 
+                      onClick={() => setEditMode(false)}
+                      type="button"
+                    >
                       <FaTimes /> Cancel
                     </Button>
                   </div>
@@ -255,11 +410,11 @@ const UserProfile: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-gray-400">Contact Number</div>
-                        <div className="font-bold text-white">Not provided</div>
+                        <div className="font-bold text-white">{user.contact ? user.contact : "Not provided"}</div>
                       </div>
                       <div>
                         <div className="text-gray-400">Description</div>
-                        <div className="font-bold text-white">No description provided</div>
+                        <div className="font-bold text-white">{user.description ? user.description : "No description provided"}</div>
                       </div>
                     </div>
                   ) : (
@@ -396,4 +551,4 @@ const UserProfile: React.FC = () => {
   );
 };
 
-export default UserProfile; 
+export default UserProfile;

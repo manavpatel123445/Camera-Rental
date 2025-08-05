@@ -24,7 +24,8 @@ const Login: React.FC = () => {
       const res = await fetch('https://camera-rental-ndr0.onrender.com/api/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
+        credentials: 'include'
       });
       const data = await res.json();
       console.log('LOGIN RESPONSE:', data); // Debug: log the backend response
