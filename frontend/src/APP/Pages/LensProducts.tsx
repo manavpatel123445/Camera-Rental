@@ -218,15 +218,7 @@ const LensProducts: React.FC = () => {
         </main>
       </div>
       {/* Cart Icon Button */}
-      {showCartButton && (
-        <button
-          className="fixed top-6 right-8 z-50 bg-purple-600 hover:bg-purple-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg text-3xl"
-          onClick={() => setCartOpen(true)}
-          aria-label="Open cart"
-        >
-          🛒
-        </button>
-      )}
+      
       
       <Footer/>
     </div>
