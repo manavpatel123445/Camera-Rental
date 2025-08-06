@@ -29,10 +29,15 @@ const UserProfile: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Example stats (replace with real data)
+  // State for user orders and stats
+  const [orders, setOrders] = useState([]);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalSpent, setTotalSpent] = useState(0);
+  
+  // Stats with real data
   const stats = [
-    { label: 'Total Orders', value: 0, icon: <FaCreditCard className="text-purple-400" /> },
-    { label: 'Total Spent', value: '$0.00', icon: <FaCreditCard className="text-purple-400" /> },
+    { label: 'Total Orders', value: totalOrders, icon: <FaCreditCard className="text-purple-400" /> },
+    { label: 'Total Spent', value: `$${totalSpent.toFixed(2)}`, icon: <FaCreditCard className="text-purple-400" /> },
     { label: 'Wishlist Items', value: 0, icon: <FaHeart className="text-purple-400" /> },
   ];
 
@@ -113,6 +118,43 @@ const UserProfile: React.FC = () => {
     }
     // eslint-disable-next-line
   }, []);
+
+  // Fetch user orders and calculate totals
+  const fetchUserOrders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('https://camera-rental-ndr0.onrender.com/api/orders/user', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const ordersData = await response.json();
+        setOrders(ordersData);
+        setTotalOrders(ordersData.length);
+        
+        // Calculate total spent
+        const spent = ordersData.reduce((total, order) => {
+          return total + (order.totalAmount || 0);
+        }, 0);
+        setTotalSpent(spent);
+      } else {
+        console.error('Failed to fetch orders:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserOrders();
+    }
+  }, [user]);
 
   const handleAvatarUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
