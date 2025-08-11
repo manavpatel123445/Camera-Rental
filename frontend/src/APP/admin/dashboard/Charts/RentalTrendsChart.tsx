@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   LineChart,
@@ -161,7 +163,7 @@ const RentalTrendsChart: React.FC = () => {
     );
   }
 
-  // Prepare data for charts
+  // Prepare data for chxarts
   const monthlyOrderData = analytics.trends.monthlyOrders.map(item => ({
     month: `${formatMonth(item._id.month)} ${item._id.year}`,
     orders: item.count,
@@ -241,8 +243,8 @@ const RentalTrendsChart: React.FC = () => {
             <YAxis yAxisId="right" orientation="right" />
             <Tooltip 
               formatter={(value, name) => [
-                name === 'orders' ? value : formatRevenue(Number(value)),
-                name === 'orders' ? 'Orders' : 'Revenue'
+                name === 'Revenue' ? formatRevenue(Number(value)) : value,
+                name
               ]}
             />
             <Legend />
@@ -351,8 +353,8 @@ const RentalTrendsChart: React.FC = () => {
             <YAxis />
             <Tooltip 
               formatter={(value, name) => [
-                name === 'orders' ? value : formatRevenue(Number(value)),
-                name === 'orders' ? 'Orders' : 'Revenue'
+                name === 'Revenue' ? formatRevenue(Number(value)) : value,
+                name
               ]}
             />
             <Legend />

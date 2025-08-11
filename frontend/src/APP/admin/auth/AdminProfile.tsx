@@ -19,6 +19,7 @@ import { fetchAdminProfile, setAdminUser, logout } from '../../auth/authSlice';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '../../../components/ui';
 
 const AdminProfile = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = useSelector((state: any) => state.auth.user);
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
@@ -47,6 +48,7 @@ const AdminProfile = () => {
       });
     } else {
       // If no admin data, try to fetch it
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dispatch(fetchAdminProfile() as any);
     }
   }, [admin, dispatch]);
@@ -309,7 +311,7 @@ const AdminProfile = () => {
                   <form className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block font-semibold mb-2 text-gray-700">First Name</label>
+                        <label className="block font-bold mb-2 text-black">First Name</label>
                         <Input
                           type="text"
                           name="firstName"
@@ -320,7 +322,7 @@ const AdminProfile = () => {
                         />
                       </div>
                       <div>
-                        <label className="block font-semibold mb-2 text-gray-700">Last Name</label>
+                        <label className="block font-bold mb-2 text-black">Last Name</label>
                         <Input
                           type="text"
                           name="lastName"
@@ -333,7 +335,7 @@ const AdminProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2 text-gray-700">Username</label>
+                      <label className="block font-bold mb-2 text-black">Username</label>
                       <Input
                         type="text"
                         name="username"
@@ -345,7 +347,7 @@ const AdminProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2 text-gray-700">Email Address</label>
+                      <label className="block font-bold mb-2 text-black">Email Address</label>
                       <Input
                         type="email"
                         name="email"
@@ -357,7 +359,7 @@ const AdminProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2 text-gray-700">Phone Number</label>
+                      <label className="block font-bold mb-2 text-black">Phone Number</label>
                       <Input
                         type="tel"
                         name="phone"
@@ -369,7 +371,7 @@ const AdminProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2 text-gray-700">Date of Birth</label>
+                      <label className="block font-bold mb-2 text-black">Date of Birth</label>
                       <Input
                         type="date"
                         name="dateOfBirth"
@@ -380,7 +382,7 @@ const AdminProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2 text-gray-700">Bio</label>
+                      <label className="block font-bold mb-2 text-black">Bio</label>
                       <textarea
                         name="bio"
                         value={formData.bio}

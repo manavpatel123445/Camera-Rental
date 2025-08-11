@@ -2,7 +2,7 @@ import Product from "../module/Product.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.find({ isDeleted: false }).sort({ createdAt: -1 });
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: "Server error.", error: err.message });
@@ -11,7 +11,7 @@ export const getAllProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findOne({ _id: req.params.id, isDeleted: false });
     if (!product) return res.status(404).json({ message: "Product not found." });
     res.json(product);
   } catch (err) {
@@ -81,9 +81,37 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const productId = req.params.id;
+    
+    // Check if product is used in any orders (not deleted orders)
+    const Order = (await import('../module/Order.js')).default;
+    const ordersWithProduct = await Order.find({ 
+      'items.product': productId,
+      isDeleted: false,
+      status: { $nin: ['cancelled'] }
+    });
+    
+    if (ordersWithProduct.length > 0) {
+      return res.status(400).json({ 
+        message: "Cannot delete product: This product is used in active orders.",
+        orderCount: ordersWithProduct.length
+      });
+    }
+    
+    // Soft delete the product
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { 
+        isDeleted: true, 
+        deletedAt: new Date(),
+        status: "Inactive"
+      },
+      { new: true }
+    );
+    
     if (!product) return res.status(404).json({ message: "Product not found." });
-    res.json({ message: "Product deleted." });
+    
+    res.json({ message: "Product soft deleted successfully." });
   } catch (err) {
     res.status(500).json({ message: "Server error.", error: err.message });
   }
@@ -91,7 +119,7 @@ export const deleteProduct = async (req, res) => {
 
 export const getProductStats = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find({ isDeleted: false });
     const total = products.length;
     const cameras = products.filter(p => p.category?.toLowerCase() === 'camera').length;
     const lenses = products.filter(p => p.category?.toLowerCase() === 'lens').length;

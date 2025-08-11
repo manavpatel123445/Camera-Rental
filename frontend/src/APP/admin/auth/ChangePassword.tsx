@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [token, setToken] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -65,23 +69,41 @@ const ChangePassword = () => {
         {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
         {success && <div className="mb-4 text-green-500 text-center">{success}</div>}
         {!token && (
+          <div className="w-full mb-4 relative">
+            <input
+              type={showCurrentPassword ? "text" : "password"}
+              placeholder="Current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full p-3 pr-10 rounded bg-white/70 focus:bg-white outline-none"
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            >
+              <FontAwesomeIcon icon={showCurrentPassword ? faEyeSlash : faEye} />
+            </button>
+          </div>
+        )}
+        <div className="w-full mb-6 relative">
           <input
-            type="password"
-            placeholder="Current password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full p-3 mb-4 rounded bg-white/70 focus:bg-white outline-none"
+            type={showNewPassword ? "text" : "password"}
+            placeholder="New password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="w-full p-3 pr-10 rounded bg-white/70 focus:bg-white outline-none"
             required
           />
-        )}
-        <input
-          type="password"
-          placeholder="New password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full p-3 mb-6 rounded bg-white/70 focus:bg-white outline-none"
-          required
-        />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+          >
+            <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
+          </button>
+        </div>
         <button type="submit" className="w-full bg-white text-black font-semibold py-2 rounded-full shadow hover:bg-gray-200 transition">
           Change Password
         </button>
@@ -93,4 +115,4 @@ const ChangePassword = () => {
   );
 };
 
-export default ChangePassword; 
+export default ChangePassword;

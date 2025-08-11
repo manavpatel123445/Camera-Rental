@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import CommonNavbar from '../../components/ui/CommonNavbar';
 import { Button } from '../../components/ui/Button';
@@ -62,16 +64,45 @@ const CameraProducts: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleAddToCart = (product: any) => {
-    dispatch(addToCart({
-      _id: product._id,
-      name: product.name,
-      pricePerDay: product.pricePerDay,
-      quantity: 1,
-      image: product.image,
-      rentalDays: 1,
-    }));
-    toast.success('Added to cart!');
+  const handleAddToCart = async (product: any) => {
+    if (product.quantity === 0) {
+      toast.error('Product is out of stock!');
+      return;
+    }
+    
+    try {
+      // Validate stock availability
+      const response = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${product._id}`);
+      if (!response.ok) throw new Error('Failed to check stock');
+      
+      const currentProduct = await response.json();
+      
+      if (currentProduct.quantity <= 0) {
+        toast.error('This product is currently out of stock.');
+        return;
+      }
+      
+      const existingItem = cart.find(item => item._id === product._id);
+      const currentCartQuantity = existingItem ? existingItem.quantity : 0;
+      
+      if (currentCartQuantity >= currentProduct.quantity) {
+        toast.error(`Cannot add more. Only ${currentProduct.quantity} ${currentProduct.quantity === 1 ? 'unit' : 'units'} available.`);
+        return;
+      }
+      
+      dispatch(addToCart({
+        _id: product._id,
+        name: product.name,
+        pricePerDay: product.pricePerDay,
+        quantity: 1,
+        image: product.image,
+        rentalDays: 1,
+      }));
+      toast.success('Added to cart!');
+    } catch (error) {
+      console.error('Error checking stock:', error);
+      toast.error('Unable to check stock availability. Please try again.');
+    }
   };
 
   const handleRemoveFromCart = (id: string) => {
@@ -195,10 +226,28 @@ const CameraProducts: React.FC = () => {
                     <div className="flex items-center justify-between w-full mb-4">
                       <span className="text-2xl font-bold text-white">${product.pricePerDay}</span>
                       <span className="text-gray-400 text-xs">/day</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        product.quantity === 0 ? 'bg-red-600 text-white' :
+                        product.quantity <= 5 ? 'bg-orange-600 text-white' :
+                        'bg-green-600 text-white'
+                      }`}>
+                        {product.quantity === 0 ? 'OUT' :
+                         product.quantity <= 5 ? `LOW ${product.quantity}` :
+                         product.quantity}
+                      </span>
                     </div>
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg w-full" onClick={() => handleAddToCart(product)}>
-                      Add to Cart
-                    </Button>
+                    {product.quantity === 0 ? (
+                      <Button 
+                        className="bg-gray-600 text-gray-400 font-semibold px-6 py-2 rounded-lg w-full cursor-not-allowed" 
+                        disabled
+                      >
+                        Out of Stock
+                      </Button>
+                    ) : (
+                      <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg w-full" onClick={() => handleAddToCart(product)}>
+                        Add to Cart
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -218,10 +267,28 @@ const CameraProducts: React.FC = () => {
                       <div className="text-gray-400 text-sm mb-2 truncate max-w-full" title={product.description}>{product.description}</div>
                     </div>
                     <div className="flex flex-col items-end gap-2 min-w-[120px]">
-                      <div className="font-bold text-white text-xl mb-2">${product.pricePerDay}<span className="text-sm text-gray-400">/day</span></div>
-                      <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg" onClick={() => handleAddToCart(product)}>
-                        Add to Cart
-                      </Button>
+                     
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        product.quantity === 0 ? 'bg-red-600 text-white' :
+                        product.quantity <= 5 ? 'bg-orange-600 text-white' :
+                        'bg-green-600 text-white'
+                      }`}>
+                        {product.quantity === 0 ? 'OUT' :
+                         product.quantity <= 5 ? `LOW ${product.quantity}` :
+                         product.quantity}
+                      </span>
+                      {product.quantity === 0 ? (
+                        <Button 
+                          className="bg-gray-600 text-gray-400 font-semibold px-6 py-2 rounded-lg cursor-not-allowed" 
+                          disabled
+                        >
+                          Out of Stock
+                        </Button>
+                      ) : (
+                        <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg" onClick={() => handleAddToCart(product)}>
+                          Add to Cart
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -236,4 +303,4 @@ const CameraProducts: React.FC = () => {
   );
 }; 
 
-export default CameraProducts; 
+export default CameraProducts;

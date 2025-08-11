@@ -15,9 +15,11 @@ const orderSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'paid', 'shipped', 'completed', 'cancelled'], default: 'pending' },
   startDate: { type: Date },
   endDate: { type: Date },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date }
 }, {
   timestamps: true
 });
 
 const Order = mongoose.model('Order', orderSchema);
-export default Order; 
+export default Order;

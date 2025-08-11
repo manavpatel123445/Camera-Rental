@@ -27,6 +27,7 @@ const loadCartFromStorage = (): CartItem[] => {
 const saveCartToStorage = (cart: CartItem[]) => {
   try {
     localStorage.setItem('cart', JSON.stringify(cart));
+  // eslint-disable-next-line no-empty
   } catch {}
 };
 
@@ -54,8 +55,8 @@ const cartSlice = createSlice({
     updateQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       const item = state.items.find(i => i._id === action.payload.id);
       if (item) {
-        item.quantity = action.payload.quantity;
-        if (item.quantity < 1) item.quantity = 1;
+        // For now, we'll allow the update but the actual validation happens in components
+        item.quantity = Math.max(1, action.payload.quantity);
       }
       saveCartToStorage(state.items);
     },
@@ -77,4 +78,4 @@ const cartSlice = createSlice({
 });
 
 export const { addToCart, removeFromCart, updateQuantity, updateRentalDays, clearCart } = cartSlice.actions;
-export default cartSlice.reducer; 
+export default cartSlice.reducer;

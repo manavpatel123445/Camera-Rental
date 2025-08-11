@@ -45,6 +45,11 @@ const adminSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  role: {
+    type: String,
+    enum: ['admin', 'superadmin'],
+    default: 'admin'
+  },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
   createdAt: {
@@ -54,4 +59,4 @@ const adminSchema = new mongoose.Schema({
 });
 
 const Admin = mongoose.model("Admin", adminSchema);
-export default Admin; 
+export default Admin;

@@ -16,9 +16,14 @@ import {
   deleteOrder,
   getDashboardAnalytics,
   getOrderAnalytics,
-  getUserAnalytics
+  getUserAnalytics,
+  createAdmin,
+  getAllAdmins,
+  updateAdminRole,
+  deleteAdmin
 } from "../Controller/adminController.js";
 import { adminAuth } from "../middleware/authMiddleware.js";
+import { superAdminAuth } from "../middleware/superAdminAuth.js";
 
 const router = express.Router();
 
@@ -40,5 +45,11 @@ router.delete("/orders/:id", adminAuth, deleteOrder);
 router.get("/analytics/dashboard", adminAuth, getDashboardAnalytics);
 router.get("/analytics/orders", adminAuth, getOrderAnalytics);
 router.get("/analytics/users", adminAuth, getUserAnalytics);
+
+// Superadmin routes
+router.post("/super/create-admin", superAdminAuth, createAdmin);
+router.get("/super/admins", superAdminAuth, getAllAdmins);
+router.patch("/super/admins/:id/role", superAdminAuth, updateAdminRole);
+router.delete("/super/admins/:id", superAdminAuth, deleteAdmin);
 
 export default router;

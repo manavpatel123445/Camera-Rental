@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -224,8 +225,38 @@ export default function Checkout() {
 
   const handleSubmitOrder = async () => {
     setIsProcessing(true);
-    // Create order in backend
     try {
+      // Validate stock availability before creating order
+      const stockValidationPromises = cart.map(async (item) => {
+        const response = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${item._id}`);
+        if (!response.ok) throw new Error(`Failed to check stock for ${item.name}`);
+        
+        const currentProduct = await response.json();
+        
+        if (currentProduct.quantity < item.quantity) {
+          return {
+            item,
+            availableQuantity: currentProduct.quantity,
+            valid: false
+          };
+        }
+        
+        return { item, availableQuantity: currentProduct.quantity, valid: true };
+      });
+
+      const validationResults = await Promise.all(stockValidationPromises);
+      const invalidItems = validationResults.filter(result => !result.valid);
+
+      if (invalidItems.length > 0) {
+        const errorMessages = invalidItems.map(result => 
+          `${result.item.name}: Only ${result.availableQuantity} ${result.availableQuantity === 1 ? 'unit' : 'units'} available (requested ${result.item.quantity})`
+        ).join('\n');
+        
+        alert(`Stock validation failed:\n\n${errorMessages}\n\nPlease adjust your cart quantities and try again.`);
+        setIsProcessing(false);
+        return;
+      }
+
       const token = localStorage.getItem('token');
       await fetch('https://camera-rental-ndr0.onrender.com/api/user/orders', {
         method: 'POST',
@@ -247,15 +278,14 @@ export default function Checkout() {
         }),
       });
     } catch (err) {
-      // Optionally show error
+      console.error('Order creation error:', err);
+      alert('Failed to create order. Please try again.');
     }
-    await new Promise(resolve => setTimeout(resolve, 3000));
     setIsProcessing(false);
     setOrderComplete(true);
     dispatch(clearCart());
 
     // Clear the dates from localStorage after successful order completion only
-    // This ensures dates persist for future rentals until order is completed
     localStorage.removeItem('pickupDate');
     localStorage.removeItem('dropoffDate');
   };
@@ -930,4 +960,4 @@ export default function Checkout() {
       </main>
     </div>
   );
-} 
+}

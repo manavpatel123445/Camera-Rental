@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
@@ -29,6 +30,7 @@ const ProductDetail: React.FC = () => {
         const relatedRes = await fetch(`https://camera-rental-ndr0.onrender.com/api/products?category=${data.category}&limit=4`);
         const relatedData = await relatedRes.json();
         setRelatedProducts(relatedData.filter((p: any) => p._id !== id));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setProduct(null);
       } finally {
@@ -73,44 +75,88 @@ const ProductDetail: React.FC = () => {
   const originalPrice = product.originalPrice || (product.pricePerDay ? Math.round(product.pricePerDay * 1.6) : 0);
   const discount = product.pricePerDay && originalPrice ? Math.round(100 - (product.pricePerDay / originalPrice) * 100) : 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!pickupDate || !dropoffDate) {
       alert('Please select pickup and drop-off dates.');
       return;
     }
-    // Calculate rental days
-    const days = Math.max(1, Math.ceil((new Date(dropoffDate).getTime() - new Date(pickupDate).getTime()) / (1000 * 60 * 60 * 24)));
-    dispatch(addToCart({
-      _id: product._id,
-      name: product.name,
-      pricePerDay: product.pricePerDay,
-      quantity: 1,
-      image: product.image,
-      rentalDays: days,
-      pickupDate,
-      dropoffDate,
-    }));
-    alert('Added to cart!');
+    
+    try {
+      // Validate stock availability
+      const response = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${product._id}`);
+      if (!response.ok) throw new Error('Failed to check stock');
+      
+      const currentProduct = await response.json();
+      
+      if (currentProduct.quantity <= 0) {
+        alert('This product is currently out of stock.');
+        return;
+      }
+      
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existingItem = cart.find((item: any) => item._id === product._id);
+      const currentCartQuantity = existingItem ? existingItem.quantity : 0;
+      
+      if (currentCartQuantity >= currentProduct.quantity) {
+        alert(`Cannot add more. Only ${currentProduct.quantity} ${currentProduct.quantity === 1 ? 'unit' : 'units'} available.`);
+        return;
+      }
+      
+      // Calculate rental days
+      const days = Math.max(1, Math.ceil((new Date(dropoffDate).getTime() - new Date(pickupDate).getTime()) / (1000 * 60 * 60 * 24)));
+      dispatch(addToCart({
+        _id: product._id,
+        name: product.name,
+        pricePerDay: product.pricePerDay,
+        quantity: 1,
+        image: product.image,
+        rentalDays: days,
+        pickupDate,
+        dropoffDate,
+      }));
+      alert('Added to cart!');
+    } catch (error) {
+      console.error('Error checking stock:', error);
+      alert('Unable to check stock availability. Please try again.');
+    }
   };
 
-  const handleRentNow = () => {
+  const handleRentNow = async () => {
     if (!pickupDate || !dropoffDate) {
       alert('Please select pickup and drop-off dates.');
       return;
     }
-    // Calculate rental days
-    const days = Math.max(1, Math.ceil((new Date(dropoffDate).getTime() - new Date(pickupDate).getTime()) / (1000 * 60 * 60 * 24)));
-    dispatch(addToCart({
-      _id: product._id,
-      name: product.name,
-      pricePerDay: product.pricePerDay,
-      quantity: 1,
-      image: product.image,
-      rentalDays: days,
-      pickupDate,
-      dropoffDate,
-    }));
-    navigate('/checkout');
+    
+    try {
+      // Validate stock availability
+      const response = await fetch(`https://camera-rental-ndr0.onrender.com/api/products/${product._id}`);
+      if (!response.ok) throw new Error('Failed to check stock');
+      
+      const currentProduct = await response.json();
+      
+      if (currentProduct.quantity <= 0) {
+        alert('This product is currently out of stock.');
+        return;
+      }
+      
+      const days = Math.max(1, Math.ceil((new Date(dropoffDate).getTime() - new Date(pickupDate).getTime()) / (1000 * 60 * 60 * 24)));
+      
+      dispatch(addToCart({
+        _id: product._id,
+        name: product.name,
+        pricePerDay: product.pricePerDay,
+        quantity: 1,
+        image: product.image,
+        rentalDays: days,
+        pickupDate,
+        dropoffDate,
+      }));
+      
+      navigate('/checkout');
+    } catch (error) {
+      console.error('Error checking stock:', error);
+      alert('Unable to check stock availability. Please try again.');
+    }
   };
 
   // When date pickers change, save to localStorage
@@ -207,8 +253,14 @@ const ProductDetail: React.FC = () => {
                 <span className="px-3 py-1 bg-purple-600 text-white text-xs rounded-full font-semibold">
                   {product.category}
                 </span>
-                <span className="px-3 py-1 bg-green-600 text-white text-xs rounded-full font-semibold">
-                  Available
+                <span className={`px-3 py-1 text-white text-xs rounded-full font-semibold ${
+                  product.quantity === 0 ? 'bg-red-600' :
+                  product.quantity <= 5 ? 'bg-orange-600' :
+                  'bg-green-600'
+                }`}>
+                  {product.quantity === 0 ? 'Out of Stock' :
+                   product.quantity <= 5 ? `Only ${product.quantity} Left` :
+                   'Available'}
                 </span>
               </div>
               <h1 className="text-3xl font-bold text-white mb-2">{product.name}</h1>
@@ -223,10 +275,10 @@ const ProductDetail: React.FC = () => {
                     -{discount}% OFF
                   </span>
                 )}
-                <span className="text-3xl font-bold text-white">₹{product.pricePerDay}</span>
+                <span className="text-3xl font-bold text-white">${product.pricePerDay}</span>
                 <span className="text-gray-400">/day</span>
                 {originalPrice > product.pricePerDay && (
-                  <span className="text-gray-400 line-through">₹{originalPrice}</span>
+                  <span className="text-gray-400 line-through">${originalPrice}</span>
                 )}
               </div>
               
@@ -234,6 +286,7 @@ const ProductDetail: React.FC = () => {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="text-white text-sm font-semibold mb-2 block">Pickup Date</label>
+                  
                   <input 
                     type="date" 
                     className="w-full border border-gray-600 bg-[#1E293B] text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" 
@@ -256,18 +309,39 @@ const ProductDetail: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                <Button 
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg text-lg" 
-                  onClick={handleRentNow}
-                >
-                  🚀 Rent Now
-                </Button>
-                <Button 
-                  className="w-full bg-[#1E293B] hover:bg-[#2D3748] text-white font-semibold py-3 px-6 rounded-lg text-lg border border-gray-600" 
-                  onClick={handleAddToCart}
-                >
-                  🛒 Add to Cart
-                </Button>
+                {product.quantity === 0 ? (
+                  <div className="text-center">
+                    <p className="text-red-400 font-semibold mb-2">This product is currently out of stock</p>
+                    <Button 
+                      className="w-full bg-gray-600 text-gray-400 font-semibold py-3 px-6 rounded-lg text-lg cursor-not-allowed" 
+                      disabled
+                    >
+                      🚀 Rent Now
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg text-lg" 
+                    onClick={handleRentNow}
+                  >
+                    🚀 Rent Now
+                  </Button>
+                )}
+                {product.quantity === 0 ? (
+                  <Button 
+                    className="w-full bg-[#1E293B] text-gray-400 font-semibold py-3 px-6 rounded-lg text-lg border border-gray-600 cursor-not-allowed" 
+                    disabled
+                  >
+                    🛒 Add to Cart
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full bg-[#1E293B] hover:bg-[#2D3748] text-white font-semibold py-3 px-6 rounded-lg text-lg border border-gray-600" 
+                    onClick={handleAddToCart}
+                  >
+                    🛒 Add to Cart
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -398,4 +472,4 @@ const ProductDetail: React.FC = () => {
   );
 };
 
-export default ProductDetail; 
+export default ProductDetail;

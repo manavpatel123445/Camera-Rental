@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import AdminLayout from '../components/AdminLayout';
 import { useNavigate } from 'react-router-dom';
+import { Pagination, Stack } from "@mui/material";
 
 interface User {
   _id: string;
@@ -20,6 +21,8 @@ export default function UsersList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [statusLoading, setStatusLoading] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage] = useState(7); // Default to 7 per page
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -52,6 +55,7 @@ export default function UsersList() {
         } else {
           setError(data.message || 'Failed to fetch users.');
         }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError('Network error. Please check your connection.');
       } finally {
@@ -110,12 +114,15 @@ export default function UsersList() {
       } else {
         alert(data.message || 'Failed to update user status.');
       }
-    } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err  ) {
       alert('Network error. Please try again.');
     } finally {
       setStatusLoading(null);
     }
   };
+
+  const paginatedUsers = filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <AdminLayout>
@@ -147,7 +154,7 @@ export default function UsersList() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-100">
-                {filteredUsers.map((user, idx) => (
+                {paginatedUsers.map((user, idx) => (
                   <tr key={user._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
                     <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">{user.username}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-700">{user.email}</td>
@@ -184,10 +191,26 @@ export default function UsersList() {
               </tbody>
             </table>
           )}
+          {Math.ceil(filteredUsers.length / rowsPerPage) > 1 && (
+            <Stack spacing={2} sx={{ mt: 3, mb: 2, alignItems: 'center' }}>
+              <Pagination
+                count={Math.ceil(filteredUsers.length / rowsPerPage)}
+                page={page + 1}
+                onChange={(event, value) => setPage(value - 1)}
+                color="primary"
+                siblingCount={0}
+                boundaryCount={1}
+                showFirstButton={false}
+                showLastButton={false}
+                hidePrevButton={filteredUsers.length <= rowsPerPage}
+                hideNextButton={filteredUsers.length <= rowsPerPage}
+              />
+            </Stack>
+          )}
         </div>
         {/* User Detail Modal */}
         {modalOpen && selectedUser && (
-          <div className="fixed inset-0  bg-opacity-40 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md relative">
               <button
                 className="absolute top-4 right-4 text-2xl text-gray-400 hover:text-purple-400"
@@ -208,5 +231,4 @@ export default function UsersList() {
         )}
       </div>
     </AdminLayout>
-  );
-}
+  );}

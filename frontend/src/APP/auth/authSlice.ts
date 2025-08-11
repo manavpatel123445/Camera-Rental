@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice } from '@reduxjs/toolkit';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface User {
   username?: string;
@@ -60,7 +62,7 @@ export const fetchAdminProfile = () => async (dispatch: any) => {
   const token = localStorage.getItem('adminToken');
   if (!token) return;
   try {
-    const res = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/profile', {
+    const res = await fetch(API_ENDPOINTS.ADMIN_PROFILE, {
       headers: { Authorization: `Bearer ${token}` },
       credentials: 'include', // Include cookies in the request
     });
@@ -80,7 +82,7 @@ export const fetchAdminProfile = () => async (dispatch: any) => {
 // Thunk to login and fetch complete profile
 export const loginAndFetchProfile = (email: string, password: string) => async (dispatch: any) => {
   try {
-    const response = await fetch("https://camera-rental-ndr0.onrender.com/api/admin/login", {
+    const response = await fetch(API_ENDPOINTS.ADMIN_LOGIN, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -98,7 +100,7 @@ export const loginAndFetchProfile = (email: string, password: string) => async (
     }
     
     // Fetch complete profile data
-    const profileResponse = await fetch('https://camera-rental-ndr0.onrender.com/api/admin/profile', {
+    const profileResponse = await fetch(API_ENDPOINTS.ADMIN_PROFILE, {
       headers: { Authorization: `Bearer ${data.token}` },
       credentials: 'include',
     });

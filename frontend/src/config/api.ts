@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // API Configuration
-const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL || 'https://camera-rental-ndr0.onrender.com';
+const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL || 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:3000' 
+    : 'https://camera-rental-ndr0.onrender.com');
 
 export const API_ENDPOINTS = {
   // Productsxsd
@@ -15,6 +19,7 @@ export const API_ENDPOINTS = {
   USER_ORDER_CANCEL: (orderId: string) => `${API_BASE_URL}/api/user/orders/${orderId}/cancel`,
   
   // Admin
+  ADMIN_BASE: `${API_BASE_URL}/api/admin`,
   ADMIN_LOGIN: `${API_BASE_URL}/api/admin/login`,
   ADMIN_REGISTER: `${API_BASE_URL}/api/admin/register`,
   ADMIN_PROFILE: `${API_BASE_URL}/api/admin/profile`,
@@ -38,4 +43,4 @@ export const API_ENDPOINTS = {
   UPLOAD_URL: (filename: string) => `${API_BASE_URL}/${filename}`,
 };
 
-export default API_BASE_URL; 
+export default API_BASE_URL;

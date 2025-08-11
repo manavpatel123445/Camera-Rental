@@ -2,7 +2,7 @@
 import './App.css'
 import { Routes, Route } from 'react-router-dom';
 import AdminLogin from './APP/admin/auth/AdminLogin';
-import AdminRegister from './APP/admin/auth/AdminRegister';
+
 import ProtectedRoute from './APP/admin/components/ProtectedRoute';
 import UserProtectedRoute from './APP/components/UserProtectedRoute';
 import Dashboard from './APP/admin/dashboard/Dashboard';
@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from './APP/userAuth/userAuthSlice';
 import { fetchAdminProfile } from './APP/auth/authSlice';
+import { type AppDispatch,type  RootState } from './APP/store';
 import ProductList from './APP/admin/products/ProductList';
 import AddProduct from './APP/admin/products/AddProduct';
 import ProductDetail from './APP/Pages/ProductDetail';
@@ -33,11 +34,11 @@ import Support from './APP/Pages/Support';
 
 
 function App() {
-  const dispatch = useDispatch<any>();
-  const user = useSelector((state: any) => state.userAuth?.user);
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.userAuth?.user);
   
   useEffect(() => {
-    dispatch(fetchAdminProfile() as any);
+    dispatch(fetchAdminProfile());
     
     // Check for token-user consistency on app load
     const token = localStorage.getItem('token');
@@ -61,34 +62,25 @@ function App() {
   return (
   
       <Routes>
-    
-      <Route path="/admin/login" element={<AdminLogin />} />
-    
-      <Route path="/admin/register" element={<AdminRegister />} />
-    
-      <Route path="/admin/dashboard" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
-    
-      <Route path="/admin/forgot-password" element={<ForgotPassword />} />
-    
-      <Route path="/admin/reset-password" element={<ResetPassword />} />
-    
-      <Route path="/admin/change-password" element={<ChangePassword />} />
-   
-      <Route path="/admin/profile" element={
-        <ProtectedRoute>
-          <AdminProfile />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/admin/profile" element={
-        <ProtectedRoute>
-          <AdminProfile />
-        </ProtectedRoute>
-      } />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+        
+        <Route path="/admin/reset-password" element={<ResetPassword />} />
+        
+        <Route path="/admin/change-password" element={<ChangePassword />} />
+        
+        <Route path="/admin/profile" element={
+          <ProtectedRoute>
+            <AdminProfile />
+          </ProtectedRoute>
+        } />
       
       <Route path="/admin/users" element={
         <ProtectedRoute>

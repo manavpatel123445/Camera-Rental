@@ -31,7 +31,7 @@ export const adminAuth = (req, res, next) => {
   }
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.role !== "admin") {
+    if (decoded.role !== "admin" && decoded.role !== "superadmin") {
       return res.status(403).json({ message: "Admin access required." });
     }
     req.user = decoded;

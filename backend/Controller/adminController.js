@@ -83,7 +83,7 @@ export const loginAdmin = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
-    const token = jwt.sign({ id: admin._id, email: admin.email, role: "admin" }, JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: admin._id, email: admin.email, role: admin.role }, JWT_SECRET, { expiresIn: "1d" });
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -101,7 +101,7 @@ export const loginAdmin = async (req, res) => {
         bio: admin.bio || '',
         dateOfBirth: admin.dateOfBirth || '',
         profileImage: admin.profileImage || '',
-        role: "admin" 
+        role: admin.role 
       } 
     });
   } catch (err) {
@@ -327,7 +327,7 @@ export const updateUserStatus = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('user', 'username email').sort({ createdAt: -1 });
+    const orders = await Order.find({ isDeleted: false }).populate('user', 'username email').sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: 'Server error.', error: err.message });
@@ -340,8 +340,30 @@ export const updateOrderStatus = async (req, res) => {
     const order = await Order.findById(req.params.id).populate('user', 'username email');
     if (!order) return res.status(404).json({ message: 'Order not found.' });
     const prevStatus = order.status;
+    
+    // Import Product model
+    const Product = (await import('../module/Product.js')).default;
+
+    // Handle quantity restoration when order is cancelled
+    if (status === 'cancelled' && prevStatus !== 'cancelled') {
+      for (const item of order.items) {
+        const product = await Product.findById(item.product);
+        if (product) {
+          product.quantity += item.quantity;
+          
+          // Reactivate product if it was out of stock
+          if (product.quantity > 0 && product.status === 'Inactive') {
+            product.status = 'Active';
+          }
+          
+          await product.save();
+        }
+      }
+    }
+
     order.status = status;
     await order.save();
+    
     // Send email if status changed to completed
     if (status === 'completed' && prevStatus !== 'completed' && order.user?.email) {
       // Configure transporter (use your SMTP credentials)
@@ -367,11 +389,42 @@ export const updateOrderStatus = async (req, res) => {
 
 export const deleteOrder = async (req, res) => {
   try {
-    const order = await Order.findByIdAndDelete(req.params.id);
-    if (!order) return res.status(404).json({ message: 'Order not found.' });
-    res.json({ message: 'Order deleted successfully.' });
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found." });
+
+    // Import Product model
+    const Product = (await import('../module/Product.js')).default;
+
+    // Only restore quantities if order wasn't already cancelled
+    if (order.status !== 'cancelled') {
+      for (const item of order.items) {
+        const product = await Product.findById(item.product);
+        if (product) {
+          product.quantity += item.quantity;
+          
+          // Reactivate product if it was out of stock
+          if (product.quantity > 0 && product.status === 'Inactive') {
+            product.status = 'Active';
+          }
+          
+          await product.save();
+        }
+      }
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { 
+        isDeleted: true, 
+        deletedAt: new Date(),
+        status: "cancelled"
+      },
+      { new: true }
+    );
+    
+    res.json({ message: "Order soft deleted successfully." });
   } catch (err) {
-    res.status(500).json({ message: 'Server error.', error: err.message });
+    res.status(500).json({ message: "Server error.", error: err.message });
   }
 };
 
@@ -383,18 +436,18 @@ export const getDashboardAnalytics = async (req, res) => {
     const activeUsers = await User.countDocuments({ status: 'active' });
     const disabledUsers = await User.countDocuments({ status: 'disabled' });
     
-    // Order analytics
-    const totalOrders = await Order.countDocuments();
-    const pendingOrders = await Order.countDocuments({ status: 'pending' });
-    const completedOrders = await Order.countDocuments({ status: 'completed' });
-    const cancelledOrders = await Order.countDocuments({ status: 'cancelled' });
+    // Order analytics (excluding soft-deleted orders)
+    const totalOrders = await Order.countDocuments({ isDeleted: false });
+    const pendingOrders = await Order.countDocuments({ status: 'pending', isDeleted: false });
+    const completedOrders = await Order.countDocuments({ status: 'completed', isDeleted: false });
+    const cancelledOrders = await Order.countDocuments({ status: 'cancelled', isDeleted: false });
     
-    // Product analytics
+    // Product analytics (excluding soft-deleted products)
     const Product = (await import('../module/Product.js')).default;
-    const totalProducts = await Product.countDocuments();
-    const cameras = await Product.countDocuments({ category: { $regex: /camera/i } });
-    const lenses = await Product.countDocuments({ category: { $regex: /lens/i } });
-    const accessories = await Product.countDocuments({ category: { $regex: /accessor/i } });
+    const totalProducts = await Product.countDocuments({ isDeleted: false });
+    const cameras = await Product.countDocuments({ category: { $regex: /camera/i }, isDeleted: false });
+    const lenses = await Product.countDocuments({ category: { $regex: /lens/i }, isDeleted: false });
+    const accessories = await Product.countDocuments({ category: { $regex: /accessor/i }, isDeleted: false });
     
     // Monthly order trends (last 6 months)
     const sixMonthsAgo = new Date();
@@ -403,7 +456,8 @@ export const getDashboardAnalytics = async (req, res) => {
     const monthlyOrders = await Order.aggregate([
       {
         $match: {
-          createdAt: { $gte: sixMonthsAgo }
+          createdAt: { $gte: sixMonthsAgo },
+          isDeleted: false
         }
       },
       {
@@ -423,6 +477,9 @@ export const getDashboardAnalytics = async (req, res) => {
     
     // Most popular products (by order count)
     const popularProducts = await Order.aggregate([
+      {
+        $match: { isDeleted: false }
+      },
       {
         $unwind: '$items'
       },
@@ -485,6 +542,9 @@ export const getDashboardAnalytics = async (req, res) => {
     // Cart analytics (most saved products)
     const mostSavedProducts = await Product.aggregate([
       {
+        $match: { isDeleted: false }
+      },
+      {
         $project: {
           name: 1,
           category: 1,
@@ -543,7 +603,8 @@ export const getOrderAnalytics = async (req, res) => {
     const dailyOrders = await Order.aggregate([
       {
         $match: {
-          createdAt: { $gte: startDate }
+          createdAt: { $gte: startDate },
+          isDeleted: false
         }
       },
       {
@@ -566,7 +627,8 @@ export const getOrderAnalytics = async (req, res) => {
     const statusDistribution = await Order.aggregate([
       {
         $match: {
-          createdAt: { $gte: startDate }
+          createdAt: { $gte: startDate },
+          isDeleted: false
         }
       },
       {
@@ -581,7 +643,8 @@ export const getOrderAnalytics = async (req, res) => {
     const topProducts = await Order.aggregate([
       {
         $match: {
-          createdAt: { $gte: startDate }
+          createdAt: { $gte: startDate },
+          isDeleted: false
         }
       },
       {
@@ -740,5 +803,99 @@ export const getUserAnalytics = async (req, res) => {
   } catch (err) {
     console.error('Error in getUserAnalytics:', err);
     res.status(500).json({ message: 'Server error.', error: err.message });
+  }
+};
+
+// Superadmin controller functions
+export const createAdmin = async (req, res) => {
+  try {
+    const { username, email, password, firstName, lastName, phone, role = 'admin' } = req.body;
+    
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "Username, email, and password are required." });
+    }
+    
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      return res.status(409).json({ message: "Admin with this email already exists." });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const admin = new Admin({ 
+      username, 
+      email, 
+      password: hashedPassword, 
+      firstName, 
+      lastName, 
+      phone,
+      role 
+    });
+    
+    await admin.save();
+    
+    const adminResponse = admin.toObject();
+    delete adminResponse.password;
+    
+    res.status(201).json({ 
+      message: "Admin created successfully.", 
+      admin: adminResponse 
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error.", error: err.message });
+  }
+};
+
+export const getAllAdmins = async (req, res) => {
+  try {
+    const admins = await Admin.find().select('-password -resetPasswordToken -resetPasswordExpires');
+    res.json({ admins });
+  } catch (err) {
+    res.status(500).json({ message: "Server error.", error: err.message });
+  }
+};
+
+export const updateAdminRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    
+    if (!['admin', 'superadmin'].includes(role)) {
+      return res.status(400).json({ message: "Invalid role. Must be 'admin' or 'superadmin'." });
+    }
+    
+    const admin = await Admin.findByIdAndUpdate(
+      id,
+      { role },
+      { new: true, runValidators: true }
+    ).select('-password -resetPasswordToken -resetPasswordExpires');
+    
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found." });
+    }
+    
+    res.json({ message: "Admin role updated successfully.", admin });
+  } catch (err) {
+    res.status(500).json({ message: "Server error.", error: err.message });
+  }
+};
+
+export const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Prevent superadmin from deleting themselves
+    if (id === req.user.id) {
+      return res.status(400).json({ message: "Cannot delete your own account." });
+    }
+    
+    const admin = await Admin.findByIdAndDelete(id);
+    
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found." });
+    }
+    
+    res.json({ message: "Admin deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Server error.", error: err.message });
   }
 };

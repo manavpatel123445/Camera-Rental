@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
+import SuperAdminPanel from '../components/SuperAdminPanel';
 
 import OrdersChart from './Charts/OrdersChart';
 import RentalTrendsChart from './Charts/RentalTrendsChart';
@@ -10,11 +12,18 @@ import CartAnalyticsChart from './Charts/CartAnalyticsChart';
 import TestChart from './Charts/TestChart';
 
 const Dashboard = () => {
+  const [showSuperAdminPanel, setShowSuperAdminPanel] = useState(false);
   const [dashboardAnalytics, setDashboardAnalytics] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [, setProductStats] = useState<any>({
+  const adminUser = JSON.parse(localStorage.getItem('adminProfile') || '{}');
+  const [, setProductStats] = useState<{
+    total: number;
+    cameras: number;
+    lenses: number;
+    accessories: number;
+  }>({
     total: 0,
     cameras: 0,
     lenses: 0,
@@ -31,6 +40,7 @@ const Dashboard = () => {
         const res = await fetch('https://camera-rental-ndr0.onrender.com/api/products/stats');
         const data = await res.json();
         setProductStats(data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         // Optionally handle error
       }
@@ -78,8 +88,20 @@ const Dashboard = () => {
           <div className="animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
             <div className="h-64 bg-gray-200 rounded"></div>
-          </div>
+          
+          {adminUser.role === 'superadmin' && (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Super Admin Controls</h3>
+              <button
+                onClick={() => setShowSuperAdminPanel(true)}
+                className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+              >
+                Manage Admins
+              </button>
+            </div>
+          )}
         </div>
+      </div>
       ) : error ? (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <div className="text-red-600 mb-4">
@@ -111,7 +133,7 @@ const Dashboard = () => {
           </div>
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
               <div className="text-2xl font-bold text-orange-600">
-                ${dashboardAnalytics.trends?.monthlyOrders?.reduce((sum: number, item: any) => sum + item.totalRevenue, 0).toFixed(2) || '0.00'}
+                ${dashboardAnalytics.trends?.monthlyOrders?.reduce((sum: number, item: { totalRevenue: number }) => sum + item.totalRevenue, 0).toFixed(2) || '0.00'}
               </div>
               <div className="text-gray-600">Total Revenue</div>
                   </div>
@@ -276,6 +298,11 @@ const Dashboard = () => {
           {activeTab === 'cart' && renderCart()}
         </div>
       </div>
+      
+      <SuperAdminPanel 
+        isOpen={showSuperAdminPanel} 
+        onClose={() => setShowSuperAdminPanel(false)} 
+      />
     </AdminLayout>
   );
 };

@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 
 const ResetPassword = () => {
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -50,14 +53,23 @@ const ResetPassword = () => {
           className="w-full p-3 mb-4 rounded bg-white/70 focus:bg-white outline-none"
           required
         />
-        <input
-          type="password"
-          placeholder="Enter new password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 mb-6 rounded bg-white/70 focus:bg-white outline-none"
-          required
-        />
+        <div className="w-full mb-6 relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter new password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 pr-10 rounded bg-white/70 focus:bg-white outline-none"
+            required
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+          </button>
+        </div>
         <button type="submit" className="w-full bg-white text-black font-semibold py-2 rounded-full shadow hover:bg-gray-200 transition">
           Reset Password
         </button>
@@ -69,4 +81,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword; 
+export default ResetPassword;

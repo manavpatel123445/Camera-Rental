@@ -157,6 +157,24 @@ export const createOrder = async (req, res) => {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Order items required." });
     }
+
+    // Import Product model
+    const Product = (await import('../module/Product.js')).default;
+
+    // Check product availability and update quantities
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(404).json({ message: `Product ${item.name} not found.` });
+      }
+      if (product.quantity < item.quantity) {
+        return res.status(400).json({ 
+          message: `Insufficient quantity for ${product.name}. Available: ${product.quantity}, Requested: ${item.quantity}` 
+        });
+      }
+    }
+
+    // Create order
     const order = new Order({
       user: req.user.id,
       items,
@@ -166,6 +184,21 @@ export const createOrder = async (req, res) => {
       endDate,
     });
     await order.save();
+
+    // Update product quantities
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+      product.quantity -= item.quantity;
+      
+      // Mark as inactive if out of stock
+      if (product.quantity <= 0) {
+        product.quantity = 0;
+        product.status = 'Inactive';
+      }
+      
+      await product.save();
+    }
+
     res.status(201).json(order);
   } catch (err) {
     res.status(500).json({ message: "Server error.", error: err.message });
@@ -191,10 +224,29 @@ export const cancelOrder = async (req, res) => {
     if (order.status === 'cancelled') {
       return res.status(400).json({ message: 'Order is already cancelled.' });
     }
+
+    // Import Product model
+    const Product = (await import('../module/Product.js')).default;
+
+    // Restore product quantities
+    for (const item of order.items) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.quantity;
+        
+        // Reactivate product if it was out of stock
+        if (product.quantity > 0 && product.status === 'Inactive') {
+          product.status = 'Active';
+        }
+        
+        await product.save();
+      }
+    }
+
     order.status = 'cancelled';
     await order.save();
     res.json({ message: 'Order cancelled successfully.', order });
   } catch (err) {
-    res.status(500).json({ message: 'Server error.', error: err.message });
+    res.status(500).json({ message: "Server error.", error: err.message });
   }
-}; 
+};

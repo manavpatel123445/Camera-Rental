@@ -5,6 +5,8 @@ import ProductModal from './ProductModal';
 import UpdateProductModal from './UpdateProductModal';
 import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 import ReactModal from 'react-modal';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Box, Pagination, Stack } from "@mui/material";
 
 interface Product {
   _id: string;
@@ -22,12 +24,19 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+  const [quantityFilter, setQuantityFilter] = useState({ min: '', max: '' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewProduct, setViewProduct] = useState<Product | null>(null);
-
+  
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(7); 
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -56,7 +65,7 @@ const ProductList = () => {
       } else {
         setError(data.message || 'Failed to fetch products.');
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
@@ -64,7 +73,7 @@ const ProductList = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
+void fetchProducts();
   }, []);
 
   const handleView = (product: Product) => {
@@ -72,13 +81,13 @@ const ProductList = () => {
     setViewModalOpen(true);
   };
 
-  const handleUpdate = (product: any) => {
+  const handleUpdate = (product: Product) => {
     setSelectedProduct(product);
     setUpdateModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm('Are you sure you want to delete this product? This will only soft-delete the product if it\'s not used in any active orders.')) {
       try {
         const token = localStorage.getItem('adminToken');
         
@@ -102,21 +111,23 @@ const ProductList = () => {
         
         const data = await res.json();
         if (res.ok) {
-                  toast.success('Product deleted successfully!');
-        // Remove the product from the current list immediately
-        setProducts(prevProducts => prevProducts.filter(p => p._id !== id));
-        // Refresh the product list
+          toast.success('Product deleted successfully!');
+          // Remove the product from the current list immediately
+          setProducts(prevProducts => prevProducts.filter(p => p._id !== id));
+          // Refresh the product list
           window.location.reload();
+        } else if (res.status === 400 && data.orderCount) {
+          toast.error(`Cannot delete: Product is used in ${data.orderCount} active order(s). Consider deactivating instead.`);
         } else {
           toast.error(data.message || 'Failed to delete product.');
         }
-      } catch (err) {
+      } catch {
         toast.error('Network error occurred.');
       }
     }
   };
 
-  const handleAddProduct = (product: any) => {
+  const handleAddProduct = (product: Product) => {
     // Add the new product to the current list
     setProducts(prevProducts => [product, ...prevProducts]);
     // Also refresh the list to ensure we have the latest data
@@ -163,15 +174,53 @@ const ProductList = () => {
     }
   };
 
-  // Filter products based on search
+  // Get unique categories for filter dropdown
+  const categories = Array.from(new Set(products.map(p => p.category))).sort();
+
+  // Filter products based on all criteria
   const filteredProducts = products.filter(product => {
     const searchLower = search.toLowerCase();
-    return (
+    
+    // Text search
+    const matchesSearch = !search || (
       product.name.toLowerCase().includes(searchLower) ||
       product.category.toLowerCase().includes(searchLower) ||
       (product.description && product.description.toLowerCase().includes(searchLower))
     );
+    
+    // Category filter
+    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    
+    // Status filter
+    const matchesStatus = !selectedStatus || product.status === selectedStatus;
+    
+    // Price range filter
+    const matchesPrice = (!priceRange.min || product.pricePerDay >= Number(priceRange.min)) &&
+                        (!priceRange.max || product.pricePerDay <= Number(priceRange.max));
+    
+    // Quantity filter
+    const matchesQuantity = (!quantityFilter.min || product.quantity >= Number(quantityFilter.min)) &&
+                           (!quantityFilter.max || product.quantity <= Number(quantityFilter.max));
+    
+    return matchesSearch && matchesCategory && matchesStatus && matchesPrice && matchesQuantity;
   });
+
+  // Pagination handlers
+  const handleChangePage = (event: React.ChangeEvent<unknown>, newPage: number) => {
+    setPage(newPage - 1);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Calculate paginated products
+  const paginatedProducts = filteredProducts.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   if (loading) return <div className="p-8">Loading products...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
@@ -181,20 +230,128 @@ const ProductList = () => {
       <div className="p-4 md:p-8 max-w-8xl mx-auto w-full">
         <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
           <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[var(--text-primary)]">Product Management</h1>
-          <div className="flex gap-2 w-full md:w-auto">
-            <input
-              type="text"
-              className="border border-slate-300 rounded px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-400 outline-none"
-              placeholder="Search products..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-            <button
-              className="bg-white text-black border border-slate-300 px-4 py-2 rounded"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Add product
-            </button>
+          <button
+            className="bg-white text-black border border-slate-300 px-4 py-2 rounded"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Add product
+          </button>
+        </div>
+        
+        {/* Filter Section - Aligned with table columns */}
+        <div className="bg-[var(--secondary-bg)] rounded-lg shadow border border-[var(--border-color)] mb-6">
+          <div className="p-4">
+            <div className="grid grid-cols-12 gap-4 items-end">
+              {/* Image column - hidden for filters */}
+              <div className="hidden md:block md:col-span-1"></div>
+              
+              {/* Name/Search */}
+              <div className="col-span-12 md:col-span-2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                <input
+                  type="text"
+                  className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                  placeholder="Search..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+              
+              {/* Category */}
+              <div className="col-span-12 md:col-span-2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                <select
+                  className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                  value={selectedCategory}
+                  onChange={e => setSelectedCategory(e.target.value)}
+                >
+                  <option value="">All</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Price Range */}
+              <div className="col-span-12 md:col-span-2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Price/Day</label>
+                <div className="flex gap-1">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    className="border border-slate-300 rounded px-2 py-2 w-full text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                    value={priceRange.min}
+                    onChange={e => setPriceRange({...priceRange, min: e.target.value})}
+                    min="0"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    className="border border-slate-300 rounded px-2 py-2 w-full text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                    value={priceRange.max}
+                    onChange={e => setPriceRange({...priceRange, max: e.target.value})}
+                    min="0"
+                  />
+                </div>
+              </div>
+              
+              {/* Description - hidden for filters */}
+              <div className="hidden md:block md:col-span-2"></div>
+              
+              {/* Quantity Range */}
+              <div className="col-span-12 md:col-span-1">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Qty</label>
+                <div className="flex gap-1">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    className="border border-slate-300 rounded px-2 py-2 w-full text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                    value={quantityFilter.min}
+                    onChange={e => setQuantityFilter({...quantityFilter, min: e.target.value})}
+                    min="0"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    className="border border-slate-300 rounded px-2 py-2 w-full text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                    value={quantityFilter.max}
+                    onChange={e => setQuantityFilter({...quantityFilter, max: e.target.value})}
+                    min="0"
+                  />
+                </div>
+              </div>
+              
+              {/* Status */}
+              <div className="col-span-12 md:col-span-1">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                <select
+                  className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                  value={selectedStatus}
+                  onChange={e => setSelectedStatus(e.target.value)}
+                >
+                  <option value="">All</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              
+              {/* Actions - Clear Filters */}
+              <div className="col-span-12 md:col-span-1 flex items-end">
+                <button
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+                  onClick={() => {
+                    setSearch('');
+                    setSelectedCategory('');
+                    setSelectedStatus('');
+                    setPriceRange({ min: '', max: '' });
+                    setQuantityFilter({ min: '', max: '' });
+                  }}
+                  title="Clear all filters"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -212,7 +369,7 @@ const ProductList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map(product => (
+              {paginatedProducts.map(product => (
                 <tr key={product._id} className="border-b">
                   <td className="py-2 px-4 w-24">
                     {product.image ? (
@@ -225,7 +382,22 @@ const ProductList = () => {
                   <td className="py-2 px-4 w-32 truncate">{product.category}</td>
                   <td className="py-2 px-4 w-24">${product.pricePerDay}</td>
                   <td className="py-2 px-4 w-64 max-w-xs truncate">{product.description}</td>
-                  <td className="py-2 px-4 w-20 font-semibold">{product.quantity}</td>
+                  <td className="py-2 px-4 w-20">
+                    <span className={`font-bold ${
+                      product.quantity === 0 ? 'text-red-600' : 
+                      product.quantity <= 5 ? 'text-orange-600' : 
+                      product.quantity <= 10 ? 'text-yellow-600' : 
+                      'text-green-600'
+                    }`}>
+                      {product.quantity}
+                    </span>
+                    {product.quantity === 0 && (
+                      <span className="ml-1 text-xs text-red-500 font-bold">OUT</span>
+                    )}
+                    {product.quantity > 0 && product.quantity <= 5 && (
+                      <span className="ml-1 text-xs text-orange-500 font-bold">LOW</span>
+                    )}
+                  </td>
                   <td className="py-2 px-4 w-24">
                     <button
                       className={
@@ -233,7 +405,7 @@ const ProductList = () => {
                         (product.status === "Active"
                           ? "bg-green-100 text-green-700 hover:bg-green-200"
                           : product.status === "Inactive"
-                          ? "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                          ? "bg-red-100 text-red-700 hover:bg-red-200"
                           : "bg-yellow-100 text-yellow-700")
                       }
                       onClick={() => handleToggleStatus(product)}
@@ -279,6 +451,22 @@ const ProductList = () => {
               ))}
             </tbody>
           </table>
+          
+          {/* Material-UI Pagination */}
+          <Stack spacing={2} sx={{ mt: 3, mb: 2, alignItems: 'center' }}>
+            <Pagination
+              count={Math.ceil(filteredProducts.length / rowsPerPage)}
+              page={page + 1}
+              onChange={handleChangePage}
+              color="primary"
+              siblingCount={0}
+              boundaryCount={1}
+              showFirstButton={false}
+              showLastButton={false}
+              hidePrevButton={filteredProducts.length <= rowsPerPage}
+              hideNextButton={filteredProducts.length <= rowsPerPage}
+            />
+          </Stack>
         </div>
       </div>
       <ProductModal
@@ -312,7 +500,23 @@ const ProductList = () => {
             </div>
             <div><span className="font-semibold">Price/Day:</span> ${viewProduct?.pricePerDay}</div>
             <div><span className="font-semibold">Description:</span> {viewProduct?.description || 'No description'}</div>
-            <div><span className="font-semibold">Quantity:</span> {viewProduct?.quantity}</div>
+            <div>
+              <span className="font-semibold">Quantity:</span> 
+              <span className={`font-bold ml-2 ${
+                viewProduct?.quantity === 0 ? 'text-red-600' : 
+                viewProduct?.quantity <= 5 ? 'text-orange-600' : 
+                viewProduct?.quantity <= 10 ? 'text-yellow-600' : 
+                'text-green-600'
+              }`}>
+                {viewProduct?.quantity}
+              </span>
+              {viewProduct?.quantity === 0 && (
+                <span className="ml-1 text-xs text-red-500 font-bold">OUT OF STOCK</span>
+              )}
+              {viewProduct?.quantity > 0 && viewProduct?.quantity <= 5 && (
+                <span className="ml-1 text-xs text-orange-500 font-bold">LOW STOCK</span>
+              )}
+            </div>
             <div><span className="font-semibold">Status:</span> {viewProduct?.status || 'Unknown'}</div>
             <button
               className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
@@ -327,4 +531,4 @@ const ProductList = () => {
   );
 };
 
-export default ProductList; 
+export default ProductList;

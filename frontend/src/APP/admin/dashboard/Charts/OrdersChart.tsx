@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   BarChart,
@@ -11,6 +12,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+   
   AreaChart,
   Area
 } from 'recharts';
@@ -47,9 +49,10 @@ const OrdersChart: React.FC = () => {
 
   useEffect(() => {
     fetchOrderAnalytics();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period]);
 
-  const fetchOrderAnalytics = async () => {
+  async function fetchOrderAnalytics() {
     try {
       setLoading(true);
       setError(null);
@@ -60,7 +63,7 @@ const OrdersChart: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data);
@@ -73,7 +76,7 @@ const OrdersChart: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const formatDate = (dateObj: { year: number; month: number; day: number }) => {
     return `${dateObj.month}/${dateObj.day}/${dateObj.year}`;
@@ -157,37 +160,21 @@ const OrdersChart: React.FC = () => {
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Order Trends</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={orderTrendData}>
+          <BarChart data={orderTrendData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis yAxisId="left" />
             <YAxis yAxisId="right" orientation="right" />
             <Tooltip 
               formatter={(value, name) => [
-                name === 'orders' ? value : formatRevenue(Number(value)),
-                name === 'orders' ? 'Orders' : 'Revenue'
+                 name === 'Revenue' ? formatRevenue(Number(value)) : value,
+                name
               ]}
             />
             <Legend />
-            <Area
-              yAxisId="left"
-              type="monotone"
-              dataKey="orders"
-              stroke="#8884d8"
-              fill="#8884d8"
-              fillOpacity={0.3}
-              name="Orders"
-            />
-            <Area
-              yAxisId="right"
-              type="monotone"
-              dataKey="revenue"
-              stroke="#82ca9d"
-              fill="#82ca9d"
-              fillOpacity={0.3}
-              name="Revenue"
-            />
-          </AreaChart>
+            <Bar yAxisId="left" dataKey="orders" fill="#8884d8" name="Orders" />
+            <Bar yAxisId="right" dataKey="revenue" fill="#82ca9d" name="Revenue" />
+          </BarChart>
         </ResponsiveContainer>
       </div>
 

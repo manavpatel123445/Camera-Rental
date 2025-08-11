@@ -58,9 +58,9 @@ const UserProfile: React.FC = () => {
     country: user?.address?.country || '',
   });
   
-  // Update form and address when user data changes
+  // Update form and address when user data changes - only when not in edit mode
   useEffect(() => {
-    if (user) {
+    if (user && !editMode) {
       setForm({
         name: user.username || '',
         email: user.email || '',
@@ -78,7 +78,7 @@ const UserProfile: React.FC = () => {
         });
       }
     }
-  }, [user]);
+  }, [user, editMode]);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
@@ -91,7 +91,7 @@ const UserProfile: React.FC = () => {
   }, [dispatch, user]);
 
   useEffect(() => {
-    if (user) {
+    if (user && !editMode) {
       setForm({
         name: user.username || '',
         email: user.email || '',
@@ -107,7 +107,7 @@ const UserProfile: React.FC = () => {
       });
       setAvatarPreview(user.avatar || null);
     }
-  }, [user]);
+  }, [user, editMode]);
 
   useEffect(() => {
     // Set tab from URL query param on mount
@@ -321,7 +321,7 @@ const UserProfile: React.FC = () => {
             : 'Failed to update profile';
             
         console.error('Error message to display:', errorMessage); // Debug: log error message
-        toast.error(errorMessage);
+        toast.error(errorMessage as string);
       }
     } catch (error) {
       toast.dismiss();
@@ -460,39 +460,47 @@ const UserProfile: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <form className="space-y-4">
+                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                       <div>
                         <div className="text-gray-400">Name</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="text"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={form.name}
                           onChange={e => setForm({ ...form, name: e.target.value })}
+                          disabled={isLoading}
                         />
                       </div>
                       <div>
                         <div className="text-gray-400">Email</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="email"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={form.email}
                           onChange={e => setForm({ ...form, email: e.target.value })}
+                          disabled={isLoading}
                         />
                       </div>
                       <div>
                         <div className="text-gray-400">Contact Number</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="tel"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={form.contact}
                           onChange={e => setForm({ ...form, contact: e.target.value })}
                           placeholder="Enter your contact number"
+                          disabled={isLoading}
                         />
                       </div>
                       <div>
                         <div className="text-gray-400">Description</div>
                         <textarea
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={form.description}
                           onChange={e => setForm({ ...form, description: e.target.value })}
                           placeholder="Tell us about yourself..."
+                          rows={4}
+                          disabled={isLoading}
                         />
                       </div>
                     </form>
@@ -523,45 +531,55 @@ const UserProfile: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <form className="space-y-4">
+                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                       <div>
                         <div className="text-gray-400">Street</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="text"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={address.street}
                           onChange={e => setAddress({ ...address, street: e.target.value })}
+                          disabled={isLoading}
                         />
                       </div>
                       <div>
                         <div className="text-gray-400">City</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="text"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={address.city}
                           onChange={e => setAddress({ ...address, city: e.target.value })}
+                          disabled={isLoading}
                         />
                       </div>
                       <div>
                         <div className="text-gray-400">State</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="text"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={address.state}
                           onChange={e => setAddress({ ...address, state: e.target.value })}
+                          disabled={isLoading}
                         />
                       </div>
                       <div>
                         <div className="text-gray-400">Zip</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="text"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={address.zip}
                           onChange={e => setAddress({ ...address, zip: e.target.value })}
+                          disabled={isLoading}
                         />
                       </div>
                       <div>
                         <div className="text-gray-400">Country</div>
                         <input
-                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1"
+                          type="text"
+                          className="w-full bg-[#232136] text-white border border-gray-700 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:border-purple-400"
                           value={address.country}
                           onChange={e => setAddress({ ...address, country: e.target.value })}
+                          disabled={isLoading}
                         />
                       </div>
                     </form>
